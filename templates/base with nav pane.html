@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}{% endblock title %}</title>
+    {% load bootstrap5 %} {% bootstrap_css %} {% bootstrap_javascript %}
+    <style>
+      div {
+        padding-top: 10px;
+        padding-right: 10px;
+        padding-bottom: 10px;
+        padding-left: 10px;
+      }
+      th, td {
+        padding-top: 10px;
+        padding-bottom: 20px;
+        padding-left: 30px;
+        padding-right: 40px;
+      }
+      </style>
+  </head>
+  <body>
+    <table width="100%">
+      <TR>
+        <TD align="center"><a href={% url 'home' %}>Home</a></TD>
+        <TD align="center"><a href={% url 'musicians' %}>Musicians</a></TD>
+        <TD align="center"><a href={% url 'bands' %}>Bands</a></TD>
+        <TD align="center"><a href={% url 'venues' %}>Venues</a></TD>
+        <TD align="center"><a href={% url 'news_advanced' %}>News</a></TD>
+        <TD align="center">
+          {% if user.is_authenticated %}
+            <H3>{{user.username}}</h3>
+          {% endif %}</TD>
+        <TD align="center">
+          {% if user.is_authenticated %}
+            <a href="{% url 'logout' %}">Logout</a>
+          {% else %}
+            <a href="{% url 'login' %}">Login</a>
+          {% endif %}</TD>
+      </TR>
+    </table>
+    <HR>
+   <p style="float: right;">
+      {% if user.is_authenticated %}
+        Hello, {{user.username}}! &nbsp;&nbsp;
+      {% endif %}
+
+    <a href="{% url 'home' %}">Home</a> &nbsp;
+    {% if user.is_authenticated %}
+      <a href="{% url 'logout' %}">Logout</a>
+    {% else %}
+      <a href="{% url 'login' %}">Login</a>
+    {% endif %}
+      {% block content %} {% endblock content %}
+    </div>
+  </body>
+</html>

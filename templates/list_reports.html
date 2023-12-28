@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Hotrocks News{% endblock title %}
+
+{% block content %}
+<h1 class="text-dark">Incident Reports</h1>
+
+<table style="width:100%"  class="table table-bordered table-light "> 
+  <form method="get" action="{% url 'view_report'  1 %}">
+  <thead>
+    <tr style='background-color:white'>
+      <th>Date</th>
+      <th>Site</th>
+      <th>Description</th>
+      <th>Reported By</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody class="table-group-divider">
+    {% for item in reports %}
+    <tr style='background-color:{% cycle 'LightGray' 'SeaShell' %}' >
+      <td><a href="{% url 'view_report'  item.id %}">{{item.incident_date}}</td>
+      <td>{{item.site}}</td></a>
+      <td>{{item.description}}</td>
+      <td>{{item.reported_by}}</td>
+      <td><button formnovalidate class="btn btn-primary" name=edit value="{{ item.id }}">Edit</button></td>
+    </tr>
+    {% empty %}
+    <tr style='background-color:{% cycle 'LightGreen' 'LightSalmon' %}' >
+      <td>No Reports in the database</td><td></td><td></td><td></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</form>
+</table>
+{% endblock content %}
+</html>
