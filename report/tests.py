@@ -35,3 +35,27 @@ class TestReports(TestCase):
         response = self.client.get(url)
         self.assertEqual(200, response.status_code)
         self.assertIn("View Report", str(response.content))
+
+    def test_should_display_report_in_view_report(self):
+        url = f"/report/view_report/{self.incident_report.id}/"
+        response = self.client.get(url)
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(response.context["report"].id, self.incident_report.id)
+        self.assertIn(self.incident_report.site, str(response.content))
+        
+    def test_should_display_incident_type_from_IncidentTypeChoice(self):
+        url = f"/report/view_report/{self.incident_report.id}/"
+        response = self.client.get(url)
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(response.context["report"].id, self.incident_report.id)
+        self.assertIn(self.incident_report.incident_type.label, str(response.content))
+
+    def test_should_display_pdf_of_incident_report(self):
+        url = f"/report/pdf_report/{self.incident_report.id}/"
+        response = self.client.get(url)
+        self.assertEqual(200, response.status_code)
+        self.assertEquals(response.get('Content-Disposition'),
+                          'attachment; filename="report.pdf"'
+        )
