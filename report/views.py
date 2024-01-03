@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404, get_list_or_404
+from django.shortcuts import render, get_object_or_404, get_list_or_404, redirect
 from report.models import IncidentReport, IncidentTypeChoice
 from django.core.paginator import Paginator
 from datetime import datetime, timezone
@@ -47,32 +47,21 @@ def view_report(request, report_id=0):
         report = get_object_or_404(IncidentReport, id = report_id)
     
     if request.method == "GET":
-        print("----------------IN GET ----------------")
         if report_id == 0:
-            print("--------new report created")
             form = IncidentReportForm()
         else:
-            print("--------using existing form")
             form = IncidentReportForm(instance=report)
 
     else: #POST
-        print("----------------IN POST ----------------")
-        print(f"report id: {report_id}")
         if report_id == 0:
-            print("--------new report about to create")
             #report = IncidentReport.objects.create(
              #   incident_date=datetime(2023, 1, 1, 7, 0, tzinfo=timezone.utc),
               #  sign_off_date=datetime(2023, 1, 1, 7, 0, tzinfo=timezone.utc),)
             report = IncidentReport()
-            print("--------new report created")
-            print(report)
-        print(f"print report again: {report}")
         form = IncidentReportForm(request.POST, request.FILES, instance=report)
 
-        print(f"check if form valid {form.is_valid()}")
         if form.is_valid():
             report = form.save()
-            print("saved form")
 
     #report.incident_type = IncidentTypeChoice(report.incident_type).label
     data = {
@@ -86,11 +75,7 @@ def pdf_report(request, report_id):
         report = get_list_or_404(IncidentReport, id = report_id)
     else:
         return redirect("list_reports")
-    print(report)
     data = serializers.serialize( "python", report )
-    print(data[0])
-    print(data[0]['fields'].get('incident_type'))
-    print(f"incident type label hard coded: {IncidentTypeChoice('I').label}")
     buffer = io.BytesIO()
 
     # Create the PDF object, using the buffer as its "file."
@@ -102,11 +87,8 @@ def pdf_report(request, report_id):
     hval=780
     for key,value in data[0]['fields'].items():
         if key == "incident_type":
-            print(f"incident type: {key}:{value}")
             value = IncidentTypeChoice(value).label
-            print(f"value: {value}")
         p.drawString(20, hval, f"{key} : {value}")
-        print (f"{key} : {value} : {hval}")
         hval -= 20
 
     # Close the PDF object cleanly, and we're done.
@@ -117,3 +99,19 @@ def pdf_report(request, report_id):
     # present the option to save the file.
     buffer.seek(0)
     return FileResponse(buffer, as_attachment=True, filename='report.pdf')
+
+def new_report(request):
+
+    if request.method == "GET": 
+        form = IncidentReportForm()
+    else: #POST      
+        form = IncidentReportForm(request.POST, request.FILES)
+
+        if form.is_valid():
+            report = form.save()
+            return redirect("list_reports")
+        
+    data = {
+        "form": form,
+    }
+    return render(request, 'new.html', data)
