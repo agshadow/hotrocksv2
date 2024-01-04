@@ -144,3 +144,17 @@ def update(request, report_id):
     }
     return render(request, "update.html", data)
 
+
+def delete(request, report_id):
+    report = get_object_or_404(IncidentReport, id=report_id)
+    report.delete()
+    return redirect("list_reports")
+
+
+def delete_confirmation(request, report_id):
+    report = get_object_or_404(IncidentReport, id=report_id)
+    report.incident_type = IncidentTypeChoice(report.incident_type).label
+    data = {
+        'report' : report
+    }
+    return render(request, "delete_confirmation.html", data)

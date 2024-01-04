@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Hotrocks Delete Report{% endblock title %}
+
+{% block content %}
+<h1 class="text-dark">Delete Report</h1>
+
+<ul>
+  <li>
+    Incident Date : {{report.incident_date}}
+  </li>
+  <li>
+    Incident Type : {{report.incident_type}}
+  </li>
+  <li>
+    Site : {{report.site}}
+  </li>
+  <li>
+    Reported By : {{report.reported_by}}
+    </li>
+  <li>
+    Description  : {{report.description}}
+  </li>
+  </ul>
+  
+    <div class="d-flex p-2">
+      <form method="get" action="{% url 'delete'  report.id %}">
+        <button formnovalidate class="btn btn-primary"  >Delete</button>
+      </form>
+      <form method="get" action="{% url 'list_reports' %}">
+        <button formnovalidate class="btn btn-primary"  >Cancel</button>
+      </form>
+    </div>
+
+
+{% endblock content %}
+</html>

@@ -51,11 +51,14 @@ class TestListReports(TestCase):
         self.assertIn(self.incident_report.sign_off, str(response.content))
 
     def test_edit_button_should_link_to_edit_page(self):
-        
         url = "/report/list_reports/"
         response = self.client.get(url)
         self.assertContains(response, 'action="/report/update/')
 
+    def test_should_render_delete_button_on_list_reports_page_and_target_delete_confirmation(self):
+        url = "/report/list_reports/"
+        response = self.client.get(url)
+        self.assertContains(response, 'action="/report/delete_confirmation/')
 
 class TestNewReport(TestCase):
     def setUp(self):
@@ -138,39 +141,7 @@ class TestNewReport(TestCase):
         self.assertRedirects(response, expected_url='/report/list_reports/')
         self.assertEqual(IncidentReport.objects.count(), 1)
 
-class TestViewReport(TestCase):
-    def setUp(self):
-        self.incident_report  = IncidentReport.objects.create(
-            incident_type = IncidentTypeChoice.INJURY,
-            incident_date=datetime(2023, 1, 1, 7, 0, tzinfo=timezone.utc),
-            site = "Footscray",
-            reported_by = "user",
-            description = "operator was injured",
-            sign_off = "user",
-            sign_off_date=date(2023, 1, 2),
-        )
-    def test_view_report(self):
-        url = "/report/view_report/1/"
-        response = self.client.get(url)
-        self.assertEqual(200, response.status_code)
-        self.assertIn("View Report", str(response.content))
 
-    def test_should_display_report_in_view_report(self):
-        url = f"/report/view_report/{self.incident_report.id}/"
-        response = self.client.get(url)
-
-        self.assertEqual(200, response.status_code)
-        self.assertIn(self.incident_report.site, str(response.content))
-       
-    def test_should_display_incident_type_from_IncidentTypeChoice(self):
-        url = f"/report/view_report/{self.incident_report.id}/"
-        response = self.client.get(url)
-
-        self.assertEqual(200, response.status_code)
-        self.assertIn(self.incident_report.incident_type.label, str(response.content))
-
-#add test for delete report
-        
 
 
 class TestPdfResport(TestCase):
@@ -340,3 +311,75 @@ class TestUpdatePage(TestCase):
         self.assertRedirects(response, expected_url='/report/list_reports/')
         self.assertEqual(IncidentReport.objects.count(), 1)
         self.assertEqual(IncidentReport.objects.first().site, "Broadmeadows")
+
+class TestDeletePage(TestCase):
+    def setUp(self):
+        self.incident_report  = IncidentReport.objects.create(
+            incident_type = IncidentTypeChoice.INJURY,
+            incident_date=datetime(2023, 1, 1, 7, 0, tzinfo=timezone.utc),
+            site = "Footscray",
+            reported_by = "user",
+            description = "operator was injured",
+            sign_off = "user",
+            sign_off_date=date(2023, 1, 2),
+        )
+
+    def test_should_delete_task_on_delete_page(self):
+        self.assertEqual(IncidentReport.objects.count(), 1)
+
+        url = f"/report/delete/{self.incident_report.id}/"
+        response = self.client.post(url)
+
+        self.assertRedirects(response, expected_url='/report/list_reports/')
+        self.assertEqual(IncidentReport.objects.count(), 0)
+    
+    def test_should_404_when_invalid_item_is_sent_to_delete_page(self):
+        
+        self.assertEqual(IncidentReport.objects.count(), 1)
+
+        url = f"/report/delete/2/"
+        response = self.client.post(url)
+
+        self.assertEqual(response.status_code,404)
+
+class TestDeleteConfirmationPage(TestCase):
+    def setUp(self):
+        self.incident_report  = IncidentReport.objects.create(
+            incident_type = IncidentTypeChoice.INJURY,
+            incident_date=datetime(2023, 1, 1, 7, 0, tzinfo=timezone.utc),
+            site = "Footscray",
+            reported_by = "user",
+            description = "operator was injured",
+            sign_off = "user",
+            sign_off_date=date(2023, 1, 2),
+        )
+
+    def test_should_display_delete_confirmation_page(self):
+        url = f"/report/delete_confirmation/{self.incident_report.id}/"
+        response = self.client.get(url)
+        self.assertTemplateUsed(response, 'delete_confirmation.html')
+        self.assertEqual(response.status_code,200)
+
+    def test_should_display_item_to_delete_on_delete_confirmation_page(self):
+        url = f"/report/delete_confirmation/{self.incident_report.id}/"
+        response = self.client.get(url)
+        
+        self.assertContains(response, self.incident_report.site)
+        self.assertContains(response, self.incident_report.reported_by)
+        self.assertContains(response, self.incident_report.description)
+        self.assertIn(self.incident_report.incident_type.label, str(response.content))
+
+    def test_should_render_form_button_delete(self):
+        
+        url = f"/report/delete_confirmation/{self.incident_report.id}/"
+        response = self.client.get(url)
+
+        self.assertContains(response, f'<form method="get" action="/report/delete/{self.incident_report.id}/">')
+        
+ 
+    def test_should_render_form_button_cancel(self):
+        
+        url = f"/report/delete_confirmation/{self.incident_report.id}/"
+        response = self.client.get(url)
+
+        self.assertContains(response, '<form method="get" action="/report/list_reports/">')

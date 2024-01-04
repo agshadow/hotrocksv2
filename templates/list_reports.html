@@ -14,7 +14,7 @@
       <th>Site</th>
       <th>Description</th>
       <th>Reported By</th>
-      <th>Action</th>
+      <th >Action</th>
     </tr>
   </thead>
   <tbody class="table-group-divider">
@@ -25,9 +25,12 @@
       <td>{{item.description}}</td>
       <td>{{item.reported_by}}</td>
       <td> 
-        <form method="get" action="{% url 'update'  item.id %}">
+        <div class="d-flex p-2"><form method="get" action="{% url 'update'  item.id %}">
           <button formnovalidate class="btn btn-primary"  >Edit</button>
-        </form></td>
+        </form>
+        <form method="get" action="{% url 'delete_confirmation'  item.id %}">
+          <button formnovalidate class="btn btn-primary"  >Delete</button>
+        </form></td></div></td>
     </tr>
     {% empty %}
     <tr style='background-color:{% cycle 'LightGreen' 'LightSalmon' %}' >
