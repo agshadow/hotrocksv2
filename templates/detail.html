@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Hotrocks {% endblock title %}
+
+{% block content %}
+<h1 class="text-dark">Detail screen:</h1>
+<p>
+    <form enctype="multipart/form-data" method="post">
+      {% csrf_token %}
+      {{form.as_p}}
+    </form>
+  </p>
+
+
+{% endblock content %}
+</html>

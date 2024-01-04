@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Hotrocks News{% endblock title %}
+{% block title %}Hotrocks - Incident Reports{% endblock title %}
 
 {% block content %}
 <h1 class="text-dark">Incident Reports</h1>
@@ -7,8 +7,7 @@
 <p>
   <a href="{% url 'add_report' %}">Add Incident Report</a>
 </p>
-<table style="width:100%"  class="table table-bordered table-light "> 
-  <form method="get" action="{% url 'view_report'  1 %}">
+<table style="width:100%"  class="table table-bordered table-light ">
   <thead>
     <tr style='background-color:white'>
       <th>Date</th>
@@ -21,11 +20,14 @@
   <tbody class="table-group-divider">
     {% for item in reports %}
     <tr style='background-color:{% cycle 'LightGray' 'SeaShell' %}' >
-      <td><a href="{% url 'view_report'  item.id %}">{{item.incident_date}}</td>
+      <td><a href="{% url 'detail'  item.id %}">{{item.incident_date}}</td>
       <td>{{item.site}}</td></a>
       <td>{{item.description}}</td>
       <td>{{item.reported_by}}</td>
-      <td><button formnovalidate class="btn btn-primary" name=edit value="{{ item.id }}">Edit</button></td>
+      <td> 
+        <form method="get" action="{% url 'update'  item.id %}">
+          <button formnovalidate class="btn btn-primary"  >Edit</button>
+        </form></td>
     </tr>
     {% empty %}
     <tr style='background-color:{% cycle 'LightGreen' 'LightSalmon' %}' >
@@ -33,7 +35,6 @@
     </tr>
     {% endfor %}
   </tbody>
-</form>
 </table>
 {% endblock content %}
 </html>

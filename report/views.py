@@ -6,7 +6,8 @@ import io
 from django.http import FileResponse
 from reportlab.pdfgen import canvas
 from django.core import serializers
-from report.forms import IncidentReportForm
+from report.forms import IncidentReportForm, ReadOnlyIncidentReportForm, UpdateIncidentReportForm
+from report.tables import IncidentReportTable
 
 def _get_items_per_page(request):
     # Determine how many items to show per page, disallowing <1 or >50
@@ -115,3 +116,31 @@ def new_report(request):
         "form": form,
     }
     return render(request, 'new.html', data)
+
+def detail(request, report_id):
+    report = get_object_or_404(IncidentReport, id = report_id)
+    
+    form = ReadOnlyIncidentReportForm(instance=report)
+           
+    data = {
+        "form": form,
+    }
+    return render(request, 'detail.html', data)
+
+
+def update(request, report_id):
+    report = get_object_or_404(IncidentReport, id = report_id)
+    
+    if request.method == "GET":
+        form = UpdateIncidentReportForm(instance=report)
+    else: # POST
+        form = UpdateIncidentReportForm(request.POST, instance=report)
+        if form.is_valid():
+            form.save()
+            return redirect("list_reports")
+           
+    data = {
+        "form": form,
+    }
+    return render(request, "update.html", data)
+
