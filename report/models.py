@@ -39,3 +39,9 @@ class IncidentReport(models.Model):
 
     class Meta:
         ordering = ["incident_date",]
+
+
+class IncidentReportFiles(models.Model):
+    incident_report = models.ForeignKey(IncidentReport, on_delete=models.CASCADE)
+    filename = models.CharField(max_length=100,blank=True, null=True)
+    file = models.FileField(blank=True, null=True)

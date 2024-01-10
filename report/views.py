@@ -1,12 +1,15 @@
 from django.shortcuts import render, get_object_or_404, get_list_or_404, redirect
-from report.models import IncidentReport, IncidentTypeChoice
+from report.models import IncidentReport, IncidentTypeChoice, IncidentReportFiles
 from django.core.paginator import Paginator
 from datetime import datetime, timezone
 import io
+
+import uuid
 from django.http import FileResponse
 from reportlab.pdfgen import canvas
 from django.core import serializers
-from report.forms import IncidentReportForm, ReadOnlyIncidentReportForm, UpdateIncidentReportForm
+from report.forms import IncidentReportForm, ReadOnlyIncidentReportForm, UpdateIncidentReportForm, \
+    IncidentReportFileForm
 from report.tables import IncidentReportTable
 
 def _get_items_per_page(request):
@@ -104,26 +107,40 @@ def pdf_report(request, report_id):
 def new_report(request):
 
     if request.method == "GET": 
-        form = IncidentReportForm()
+        incident_report_form = IncidentReportForm()
+        incident_report_file_form = IncidentReportFileForm()
     else: #POST      
-        form = IncidentReportForm(request.POST, request.FILES)
+        incident_report_form = IncidentReportForm(request.POST, request.FILES)
 
-        if form.is_valid():
-            report = form.save()
+
+
+        if incident_report_form.is_valid() :
+            incident_report_form = incident_report_form.save()
+            report = IncidentReport.objects.get(id = incident_report_form.id)
+            if request.FILES != {}:
+                f = request.FILES['file'].name
+                request.FILES['file'].name = str(uuid.uuid4())
+                #incident_report_file_form = IncidentReportFileForm(request.POST, request.FILES, instance=report)
+                incident_report_file = IncidentReportFiles.objects.create(
+                    incident_report = report,
+                    filename = f, 
+                    file=request.FILES['file'])
             return redirect("list_reports")
         
     data = {
-        "form": form,
+        "incident_report_form": incident_report_form,
+        "incident_report_file_form" : incident_report_file_form,
     }
     return render(request, 'new.html', data)
 
 def detail(request, report_id):
     report = get_object_or_404(IncidentReport, id = report_id)
-    
+    files = IncidentReportFiles.objects.filter(incident_report = report)
     form = ReadOnlyIncidentReportForm(instance=report)
            
     data = {
         "form": form,
+        "files": files,
     }
     return render(request, 'detail.html', data)
 

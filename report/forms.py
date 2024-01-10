@@ -1,5 +1,5 @@
 from django import forms
-from report.models import IncidentReport, IncidentTypeChoice
+from report.models import IncidentReport, IncidentTypeChoice, IncidentReportFiles
 from datetime import datetime, date
 
 #IncidentReportForm = \
@@ -145,3 +145,8 @@ class UpdateIncidentReportForm(forms.ModelForm):
     action_taken = forms.CharField(widget=forms.Textarea(attrs={"rows": "6", "cols": "50"}),required=False)
     sign_off = forms.CharField()
     sign_off_date = forms.DateField()
+    
+
+IncidentReportFileForm = forms.modelform_factory(
+    IncidentReportFiles, fields=["file", "filename", "incident_report"],widgets = {'filename': forms.HiddenInput(),'incident_report': forms.HiddenInput(),}
+)

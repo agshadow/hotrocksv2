@@ -6,7 +6,10 @@
 <p>
   <form enctype="multipart/form-data" method="post">
     {% csrf_token %}
-    {{form.as_p}}
+    {{incident_report_form.as_p}}
+    <HR>
+    <P><B>Upload File:</B></P>
+    {{incident_report_file_form.as_p}}
     <button class="btn btn-dark" type="submit">Save</button>
   </form>
 </p>

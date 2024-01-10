@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Hotrocks Calendar{% endblock title %}
+
+{% block content %}
+<h1 class="text-dark">Calendar</h1>
+<p>
+Hello World<P>
+
+</P>
+Date Range: <BR>
+from: {{datefrom|date:"D, M j"}} <BR>
+to:   {{dateto|date:"D, M j"}}
+</p>
+Jobs:
+<table style="width:100%"  class="table table-bordered table-light ">
+    <TR>
+    <TH>Date</TH>
+    <TH>Job</TH>
+    <TH>Crew</TH>
+    <TH>Notes</TH>
+    <TH>Quantity</TH>
+    </TR>
+    {% for job in jobs %}
+    <TD>{{job.date|date:"D, M j"}}</TD>
+    <TD>{{job.job.name}}</TD>
+    <TD>{{job.crew}}</TD>
+    <TD>{{job.notes}}</TD>
+    <TD>{{job.quantity}}</TD>
+    <TR></TR>
+    {% endfor %}
+</table>
+
+
+
+{% endblock content %}
+</html>

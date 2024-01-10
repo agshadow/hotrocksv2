@@ -1,9 +1,12 @@
-from django.test import TestCase
-
+from django.test import TestCase, override_settings
+import uuid
+import tempfile
+from base64 import b64decode
 from datetime import datetime, timezone
 from datetime import date
-from report.models import IncidentReport, IncidentTypeChoice
-from report.forms import NewIncidentReportForm, UpdateIncidentReportForm
+from report.models import IncidentReport, IncidentTypeChoice, IncidentReportFiles
+from report.forms import NewIncidentReportForm, UpdateIncidentReportForm, IncidentReportFileForm
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 
 class TestIncidentReportModel(TestCase):       
@@ -12,7 +15,7 @@ class TestIncidentReportModel(TestCase):
         reports = IncidentReport.objects.count()
         self.assertEqual(reports, 0)
         
-    def test_should_add_incident_report_model(self):
+    def test_should_add_incident_report_model(self):       
         self.incident_report  = IncidentReport.objects.create(
             incident_type = IncidentTypeChoice.INJURY,
             incident_date=datetime(2023, 1, 1, 7, 0, tzinfo=timezone.utc),
@@ -30,6 +33,82 @@ class TestIncidentReportModel(TestCase):
         reports = IncidentReport.objects.count()
         self.assertEqual(reports, 1)
 
+
+class TestIncidentReportFilesModel(TestCase):       
+    def setUp(self):
+        self.incident_report  = IncidentReport.objects.create(
+            incident_type = IncidentTypeChoice.INJURY,
+            incident_date=datetime(2023, 1, 1, 7, 0, tzinfo=timezone.utc),
+            site = "Footscray",
+            reported_by = "user",
+            description = "operator was injured",
+            sign_off = "user",
+            sign_off_date=date(2023, 1, 2),
+        )
+        # Base64 encoded version of a single pixel GIF image
+        image = "R0lGODdhAQABAIABAP///wAAACwAAAAAAQABAAACAkQBADs="
+        self.image = b64decode(image)
+
+    def test_should_be_able_to_create_a_incident_report_file_model(self):
+        files = IncidentReportFiles.objects.count()
+        self.assertEqual(files, 0)
+
+
+    @override_settings(MEDIA_ROOT=tempfile.gettempdir())
+    def test_should_add_incident_report_file_model(self):
+        
+        new_random_file_name = str(uuid.uuid4())
+        file = SimpleUploadedFile(new_random_file_name, self.image)
+
+        self.incident_report_file  = IncidentReportFiles.objects.create(
+            incident_report = self.incident_report,
+            filename="test.gif",
+            file=file,
+        )
+
+        incident_report_file1 = IncidentReportFiles.objects.first()
+        self.assertEqual(
+            'test.gif', 
+            incident_report_file1.filename
+            )
+        self.assertEqual(
+            new_random_file_name, 
+            incident_report_file1.file.name
+            )
+        self.assertEqual(
+            self.incident_report ,
+            incident_report_file1.incident_report
+            )
+        incident_report_files_count = IncidentReportFiles.objects.count()
+        self.assertEqual(incident_report_files_count, 1)
+
+    @override_settings(MEDIA_ROOT=tempfile.gettempdir())
+    def test_should_add_incident_report_file_model_and_auto_geneate_random_file_name(self):
+        
+        new_random_file_name = str(uuid.uuid4())
+        file = SimpleUploadedFile(new_random_file_name, self.image)
+
+        self.incident_report_file  = IncidentReportFiles.objects.create(
+            incident_report=self.incident_report,
+            filename="test.gif",
+            file=file,
+        )
+
+        incident_report_file1 = IncidentReportFiles.objects.first()
+        self.assertEqual(
+            'test.gif', 
+            incident_report_file1.filename
+            )
+        self.assertEqual(
+            new_random_file_name, 
+            incident_report_file1.file.name
+            )
+        self.assertEqual(
+            self.incident_report ,
+            incident_report_file1.incident_report
+            )
+        incident_report_files_count = IncidentReportFiles.objects.count()
+        self.assertEqual(incident_report_files_count, 1)
 
 class TestListReports(TestCase):
     def setUp(self):
@@ -60,6 +139,28 @@ class TestListReports(TestCase):
         response = self.client.get(url)
         self.assertContains(response, 'action="/report/delete_confirmation/')
 
+    def test_should_display_link_for_new_report(self):
+        url = "/report/list_reports/"
+        response = self.client.get(url)
+        self.assertContains(response, '<a href="/report/new/">New Incident Report</a>')
+
+
+class TestIncidentReportFileForm(TestCase):
+    def setUp(self):
+        self.form = IncidentReportFileForm
+        # Base64 encoded version of a single pixel GIF image
+        image = "R0lGODdhAQABAIABAP///wAAACwAAAAAAQABAAACAkQBADs="
+        self.image = b64decode(image)
+
+    def test_should_be_able_to_create_valid_incident_report_file_form(self):
+        
+        self.assertTrue(issubclass(self.form, IncidentReportFileForm))
+        #check fields are in the meta
+        self.assertTrue('file' in self.form.Meta.fields)
+        self.assertTrue('filename' in self.form.Meta.fields)
+        self.assertTrue('incident_report' in self.form.Meta.fields)
+
+
 class TestNewReport(TestCase):
     def setUp(self):
         '''self.incident_report  = IncidentReport.objects.create(
@@ -72,6 +173,8 @@ class TestNewReport(TestCase):
             sign_off_date=date(2023, 1, 2),
         )'''
         self.form = NewIncidentReportForm
+        image = "R0lGODdhAQABAIABAP///wAAACwAAAAAAQABAAACAkQBADs="
+        self.image = b64decode(image)
     
     def test_should_render_new_page_with_correct_response(self):
         url = f"/report/new/"
@@ -123,6 +226,13 @@ class TestNewReport(TestCase):
         self.assertContains(response, 'csrfmiddlewaretoken')
         self.assertContains(response, '<label for')
 
+    def test_should_display_incident_report_file_form_in_new_page(self):
+        url = f"/report/new/"
+        response = self.client.get(url)
+
+        self.assertContains(response, '<form')
+        self.assertContains(response, 'csrfmiddlewaretoken')
+        self.assertContains(response, '<label for="id_file">File:</label>')
 
     def test_should_save_new_report_when_data_is_valid_in_new_form(self):
         data = {
@@ -141,8 +251,66 @@ class TestNewReport(TestCase):
         self.assertRedirects(response, expected_url='/report/list_reports/')
         self.assertEqual(IncidentReport.objects.count(), 1)
 
+    @override_settings(MEDIA_ROOT=tempfile.gettempdir())
+    def test_should_save_file_in_new_form(self):
+        
+        file = SimpleUploadedFile("test.gif", self.image)
+        data = {
+            'incident_report' : "none",
+            'filename' : "nonefilename",
+            'incident_type': IncidentTypeChoice.INJURY,
+            'incident_date': datetime(2023, 1, 1, 7, 0, tzinfo=timezone.utc),
+            'site' : "Footscray",
+            'reported_by' : "user1",
+            'description' : "operator was injured",
+            'sign_off' : "user",
+            'sign_off_date':date(2023, 1, 2),
+            'file': file,
+
+        }
+        
+
+        url = f"/report/new/"
+        response = self.client.post(url, data)
+
+        self.assertRedirects(response, expected_url='/report/list_reports/')
+        self.assertEqual(IncidentReport.objects.count(), 1)
+        self.assertEqual(IncidentReportFiles.objects.count(), 1)
+
+class TestNewReportFile(TestCase):
+    def setUp(self):   
+        self.incident_report  = IncidentReport.objects.create(
+            incident_type = IncidentTypeChoice.INJURY,
+            incident_date=datetime(2023, 1, 1, 7, 0, tzinfo=timezone.utc),
+            site = "Footscray",
+            reported_by = "user",
+            description = "operator was injured",
+            sign_off = "user",
+            sign_off_date=date(2023, 1, 2),
+        )
+        self.form = NewIncidentReportForm
+        image = "R0lGODdhAQABAIABAP///wAAACwAAAAAAQABAAACAkQBADs="
+        self.image = b64decode(image)
 
 
+    '''@override_settings(MEDIA_ROOT=tempfile.gettempdir())
+    def test_should_save_file_in_new_form(self):
+        
+        file = SimpleUploadedFile("test.gif", self.image)
+        data = {
+            'incident_report' : self.incident_report,
+            'filename' : "nonefilename",
+            'file': file,
+
+        }
+        
+
+        url = f"/report/new/"
+        response = self.client.post(url, data)
+
+        self.assertRedirects(response, expected_url='/report/list_reports/')
+        self.assertEqual(IncidentReport.objects.count(), 1)
+        self.assertEqual(IncidentReportFiles.objects.count(), 1)'''
 
 class TestPdfResport(TestCase):
     def setUp(self):
@@ -165,6 +333,7 @@ class TestPdfResport(TestCase):
 
 
 class TestDetailPage(TestCase):
+    @override_settings(MEDIA_ROOT=tempfile.gettempdir())
     def setUp(self):
         self.incident_report  = IncidentReport.objects.create(
             incident_type = IncidentTypeChoice.INJURY,
@@ -185,9 +354,19 @@ class TestDetailPage(TestCase):
             sign_off_date=date(2023, 1, 2),
         )
 
+        # Base64 encoded version of a single pixel GIF image
+        image = "R0lGODdhAQABAIABAP///wAAACwAAAAAAQABAAACAkQBADs="
+        self.image = b64decode(image)
+        new_random_file_name = str(uuid.uuid4())
+        file = SimpleUploadedFile(new_random_file_name, self.image)
+
+        self.incident_report_file  = IncidentReportFiles.objects.create(
+            incident_report = self.incident_report,
+            filename="test.gif",
+            file=file,
+        )
     def test_should_display_detail_page(self):
         url = f"/report/detail/{self.incident_report.id}/"
-        print(f"url: {url}")
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'detail.html')
@@ -206,6 +385,14 @@ class TestDetailPage(TestCase):
         #dates dont display same
         #self.assertContains(response, self.incident_report.sign_off_date)
         self.assertNotContains(response, self.incident_report2.site)
+
+    def test_should_display_file_download_link(self):
+        
+        url = f"/report/detail/{self.incident_report.id}/"
+        response = self.client.get(url)
+
+        self.assertContains(response, "test.gif")
+
 
 class TestUpdatePage(TestCase):
     def setUp(self):

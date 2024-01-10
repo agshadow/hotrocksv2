@@ -9,6 +9,9 @@
       {{form.as_p}}
     </form>
   </p>
+  {% for f in files %}
+  <a href="/media/{{f.file}}">{{f.filename}}</a>
+  {% endfor %}
 
 
 {% endblock content %}

@@ -39,7 +39,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'report',
     'django_tables2',
+    'crewcal',
 ]
+
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -62,11 +65,11 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.contrib.auth.context_processors.auth',
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-            ],
+        ],
         },
     },
 ]
@@ -134,3 +137,5 @@ MEDIA_ROOT = BASE_DIR.parent / "outside/hotrocksv2/uploads"
 MEDIA_URL = "/media/"
 
 TEST_RUNNER = 'awl.waelsteng.WRunner'
+
+
