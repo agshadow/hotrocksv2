@@ -29,3 +29,4 @@ class DateEntry(models.Model):
         f"DateEntry crew={self.crew}\n"\
         f")"
         )
+    
