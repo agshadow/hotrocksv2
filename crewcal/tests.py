@@ -1,6 +1,6 @@
 from django.test import TestCase
 from datetime import date
-from .models import Job, DateEntry
+from .models import Job, DateEntry, UserProfile
 from django.contrib.auth.models import User
 
 class TestHome(TestCase):       
@@ -173,7 +173,7 @@ class TestJobAdmin(TestCase):
         self.client.login(username='admin', password='adminpass')
 
         # Get the search page for the Job model
-        search_url = f'/admin/crewcal/job/?q=Software'
+        search_url = '/admin/crewcal/job/?q=Software'
 
         # Issue a GET request to the search page
         response = self.client.get(search_url)
@@ -197,9 +197,8 @@ class TestJobAdmin(TestCase):
         self.assertEqual(response.status_code, 200)
 
         # Check if the job's name is displayed in the list view
-        self.assertContains(response, 'Dates for Job')
-        self.assertContains(response, 'Date_Entry')
-
+        self.assertContains(response, 'Associated Dates')
+        self.assertContains(response, 'Date Entries')
 
 
 class TestDateEntryAdmin(TestCase):
@@ -224,7 +223,7 @@ class TestDateEntryAdmin(TestCase):
         self.client.login(username='admin', password='adminpass')
 
         # Get the change page for the DateEntry model
-        change_page_url = f'/admin/crewcal/dateentry/'
+        change_page_url =      '/admin/crewcal/dateentry/'
 
         # Issue a GET request to the change page
         response = self.client.get(change_page_url)
@@ -240,7 +239,7 @@ class TestDateEntryAdmin(TestCase):
         self.client.login(username='admin', password='adminpass')
 
         # Get the search page for the DateEntry model
-        search_url = f'/admin/crewcal/dateentry/?q=Dev'
+        search_url = '/admin/crewcal/dateentry/?q=Dev'
 
         # Issue a GET request to the search page
         response = self.client.get(search_url)
@@ -250,3 +249,72 @@ class TestDateEntryAdmin(TestCase):
 
         # Check if the date entry's crew is found in the search results
         self.assertContains(response, 'Dev Team')
+
+
+class TestUserProfileModel(TestCase):
+    def setUp(self):
+        pass
+    def test_should_be_able_to_create_a_date_entry_model(self):
+        users = UserProfile.objects.count()
+        self.assertEqual(users, 0)
+
+    def test_should_be_able_to_add_a_company_and_workgroup(self):
+        self.user = User.objects.create_superuser(username='admin', password='adminpass', email='admin@example.com')
+        self.userprofile = UserProfile.objects.create(
+            user = self.user,
+            company = "Unisys",
+            workgroup = "Melbourne",
+        )
+        users = UserProfile.objects.count()
+        self.assertEqual(users, 1)
+        user = UserProfile.objects.first()
+        self.assertEqual(user.company,"Unisys")
+
+    def test_should_display_user_profile_in_admin_user_change_screen(self):
+        #tests the Stacked Inline and UserAdmin Classes
+        self.user = User.objects.create_superuser(username='admin', password='adminpass', email='admin@example.com')
+        self.userprofile = UserProfile.objects.create(
+            user = self.user,
+            company = "Unisys",
+        )
+        self.client.login(username='admin', password='adminpass')
+
+        change_page_url = '/admin/auth/user/1/change/'
+        response = self.client.get(change_page_url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'User Profile')
+        self.assertContains(response, 'Company')
+
+class TestRestrictedPage(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_superuser(username='admin', password='adminpass', email='admin@example.com')
+ 
+    def test_restricted_page_renders(self):
+        url =    "/cal/restricted_page"
+        self.client.login(username='admin', password='adminpass')
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "You are logged in")
+
+class TestAccountFunctionality(TestCase):
+    def test_should_be_able_to_login_using_accounts_login(self):
+        url = "/accounts/login/"
+        response = self.client.get(url)
+        self.user = User.objects.create_superuser(username='admin', password='adminpass', email='admin@example.com')
+ 
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Login")
+        self.assertContains(response, "Username")
+        self.assertContains(response, "Password")
+
+       
+        data = {
+            'username' : 'admin',
+            'password' : 'adminpass',
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, '/')

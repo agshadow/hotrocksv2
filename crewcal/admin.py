@@ -1,11 +1,13 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.models import User
 
-from .models import Job, DateEntry
+from .models import Job, DateEntry, UserProfile
 from django.utils.html import format_html
 from django.urls import reverse
 
 
-    
+
 
 @admin.register(Job)
 class JobAdmin(admin.ModelAdmin):
@@ -23,8 +25,8 @@ class JobAdmin(admin.ModelAdmin):
 
         parm = "?id__in=" + ",".join([str(d.id) for d in dates])
         url = reverse("admin:crewcal_dateentry_changelist") + parm
-        return format_html('<a href="{}">Date_Entry{}</a>', url, plural)
-    show_dates.short_description = "Dates for Job"
+        return format_html('<a href="{}">{} item{}</a>', url, len(dates),  plural)
+    show_dates.short_description = "Associated Dates"
 
 
 class JobNameFilter(admin.SimpleListFilter):
@@ -45,6 +47,34 @@ class JobNameFilter(admin.SimpleListFilter):
 
 @admin.register(DateEntry)
 class DateEntryAdmin(admin.ModelAdmin):
-    list_display = ('job', 'date', 'crew', 'notes', 'quantity')
+    list_display = ('show_job_name', 'date', 'crew', 'notes', 'quantity')
     search_fields = ('job__name', 'crew', 'notes', 'quantity')
     list_filter = (JobNameFilter,) 
+
+    def show_job_name(self, obj):
+
+        return format_html(f"{obj.job.name}")
+        '''
+        dates = obj.dateentry_set.all()
+        if len(dates) == 0:
+            return format_html("<i>None</i>")
+        
+        plural=""
+        if len(dates) > 1:
+            plural = "s"
+
+        parm = "?id__in=" + ",".join([str(d.id) for d in dates])
+        url = reverse("admin:crewcal_dateentry_changelist") + parm
+        return format_html('<a href="{}">{} item{}</a>', url, len(dates),  plural)
+        '''
+    show_job_name.short_description = "Job"
+
+class UserProfileInline(admin.StackedInline):
+    model = UserProfile
+    can_delete = False
+
+class UserAdmin(BaseUserAdmin): 
+    inlines = [UserProfileInline]
+    
+admin.site.unregister(User)
+admin.site.register(User,UserAdmin)

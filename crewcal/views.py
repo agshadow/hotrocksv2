@@ -1,4 +1,6 @@
 from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+
 from datetime import date, datetime, timedelta
 from crewcal.models import DateEntry
 
@@ -25,3 +27,12 @@ def home(request):
         "jobs" : jobs,
     }
     return render(request, "calhome.html", data)
+
+@login_required
+def restricted_page(request):
+    data = {
+        'title' : 'Restricted Page',
+        'content' : '<h1>You are logged in</h1>',
+    }
+    
+    return render(request, "general.html", data)

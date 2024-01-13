@@ -1,6 +1,5 @@
 from django.db import models
-
-# Create your models here.
+from django.contrib.auth.models import User
 
 class Job(models.Model):
     name = models.CharField(max_length=50)
@@ -14,6 +13,9 @@ class Job(models.Model):
         f"Job Location={self.location}\n"\
         f")"
         )
+     
+    class Meta:
+        ordering = ["name", "number"]   
 
 class DateEntry(models.Model):
     job = models.ForeignKey(Job, on_delete=models.CASCADE)
@@ -29,4 +31,20 @@ class DateEntry(models.Model):
         f"DateEntry crew={self.crew}\n"\
         f")"
         )
+    
+    class Meta:
+        ordering = ["date", "job__name"]
+        verbose_name = "Date Entry"
+        verbose_name_plural = "Date Entries"
+
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    company = models.CharField(max_length=100) 
+    workgroup = models.CharField(max_length=100, default="Default Workgroup") 
+
+    class Meta:
+        ordering = ["company", "workgroup"]
+        verbose_name = "User Profile"
+        verbose_name_plural = "User Profiles"
     
