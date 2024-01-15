@@ -1,14 +1,19 @@
 from django.test import TestCase
 from datetime import date
-from .models import Job, DateEntry, UserProfile
+from .models import Job, DateEntry, UserProfile, Workgroup, CompanyWorkgroup, Company
 from django.contrib.auth.models import User
 
 class TestHome(TestCase):       
     def setUp(self):
+        self.wg = Workgroup.objects.create(name="Melbourne")
+        self.cp = Company.objects.create(name="Unisys")
+        self.cw = CompanyWorkgroup.objects.create(company=self.cp, workgroup=self.wg)
+
         self.job = Job.objects.create(
             name = "Hibiscus Stage 1",
             number = "22-02-4423",
-            location = "Grange Road, Plumpton"
+            location = "Grange Road, Plumpton",
+            company_workgroup = self.cw,
         )
         self.entry1 = DateEntry.objects.create(
             job = self.job,
@@ -31,6 +36,13 @@ class TestHome(TestCase):
             notes = "Prime and Sami",
             quantity = "300T 20SI",
         )
+        self.user = User.objects.create_superuser(username='admin', password='adminpass', email='admin@example.com')
+        self.client.login(username='admin', password='adminpass')        
+        self.userprofile = UserProfile.objects.create(
+            user = self.user,
+            company_workgroup = self.cw,
+        )
+
     def test_should_be_able_render_cal_page(self):
         url = "/cal/"
         response = self.client.get(url)
@@ -48,8 +60,67 @@ class TestHome(TestCase):
         response = self.client.get(url)
         self.assertEqual(200, response.status_code)
         self.assertContains(response, "Jeff")
+    
+    def test_should_display_calendar_items_for_user(self):
+
+        self.user = User.objects.create_user(username='accentureuser', password='adminpass', email='admin@example.com')
+        self.wg1 = Workgroup.objects.create(name="Sydney")
+        self.cp1 = Company.objects.create(name="Accenture")
+        self.cw1 = CompanyWorkgroup.objects.create(company=self.cp1, workgroup=self.wg1)
+        self.userprofile = UserProfile.objects.create(
+            user = self.user,
+            company_workgroup = self.cw1
+        )
+
+        self.job2 = Job.objects.create(
+            name = "Hibiscus Stage 1",
+            number = "22-02-4423",
+            location = "Grange Road, Plumpton",
+            company_workgroup = self.cw1
+        )
+        self.entry2_1 = DateEntry.objects.create(
+            job = self.job2,
+            date = date(2024,1,9),
+            crew = "Roger",
+            notes = "Prime and Sami",
+            quantity = "205T 20SI",
+
+        )
+        url = "/cal/?datefrom=20240108&dateto=20240114"
+        response = self.client.get(url)
+        self.assertNotContains(response, "Roger")
+
+class TestHomePageAuthentication(TestCase):
+    def test_should_take_you_to_login_screen_if_not_logged_in(self):
+        url = "/cal/"
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('/accounts/login',response.url)
+
+    def test_should_render_calendar_screen_if_logged_in(self):
+        self.wg = Workgroup.objects.create(name="Melbourne")
+        self.cp = Company.objects.create(name="Unisys")
+        self.cw = CompanyWorkgroup.objects.create(company=self.cp, workgroup=self.wg)
+
+        self.user = User.objects.create_superuser(username='admin', password='adminpass', email='admin@example.com')
+        self.userprofile = UserProfile.objects.create(
+            user = self.user,
+            company_workgroup = self.cw
+        )
+        self.client.login(username='admin', password='adminpass')
+        
+        url = "/cal/"
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('/cal/',response.request['PATH_INFO'])
+        self.assertContains(response, "Calendar")
 
 class TestJobModel(TestCase):
+    def setUp(self):
+        self.wg = Workgroup.objects.create(name="Melbourne")
+        self.cp = Company.objects.create(name="Unisys")
+        self.cw = CompanyWorkgroup.objects.create(company=self.cp, workgroup=self.wg)
+
     def test_should_be_able_to_create_a_job_model(self):
         jobs = Job.objects.count()
         self.assertEqual(jobs, 0)
@@ -58,7 +129,8 @@ class TestJobModel(TestCase):
         Job.objects.create(
             name = "Hibiscus Stage 1",
             number = "22-02-4423",
-            location = "Grange Road, Plumpton"
+            location = "Grange Road, Plumpton",
+            company_workgroup = self.cw,
         )
         jobs = Job.objects.count()
         self.assertEqual(jobs, 1)
@@ -71,7 +143,8 @@ class TestJobModel(TestCase):
         job = Job.objects.create(
             name = "Hibiscus Stage 1",
             number = "22-02-4423",
-            location = "Grange Road, Plumpton"
+            location = "Grange Road, Plumpton",
+            company_workgroup = self.cw,
         )
         self.assertIn("Hibiscus",str(job))
         self.assertIn("22-02-4423",str(job))
@@ -80,10 +153,15 @@ class TestJobModel(TestCase):
 
 class TestDateEntryModel(TestCase):
     def setUp(self):
+        self.wg = Workgroup.objects.create(name="Melbourne")
+        self.cp = Company.objects.create(name="Unisys")
+        self.cw = CompanyWorkgroup.objects.create(company=self.cp, workgroup=self.wg)
+
         self.job = Job.objects.create(
             name = "Hibiscus Stage 1",
             number = "22-02-4423",
-            location = "Grange Road, Plumpton"
+            location = "Grange Road, Plumpton",
+            company_workgroup = self.cw,
         )
     def test_should_be_able_to_create_a_date_entry_model(self):
         jobs = DateEntry.objects.count()
@@ -123,10 +201,22 @@ class TestDateEntryModel(TestCase):
 class TestJobAdmin(TestCase):
     def setUp(self):
         # Create a superuser for logging into the admin site
-        self.user = User.objects.create_superuser(username='admin', password='adminpass', email='admin@example.com')
+        self.wg = Workgroup.objects.create(name="Melbourne")
+        self.cp = Company.objects.create(name="Unisys")
+        self.cw = CompanyWorkgroup.objects.create(company=self.cp, workgroup=self.wg)
 
+        self.user = User.objects.create_superuser(username='admin', password='adminpass', email='admin@example.com')
+        self.userprofile = UserProfile.objects.create(
+            user = self.user,
+            company_workgroup = self.cw,
+        )
         # Create a sample job for testing
-        self.job = Job.objects.create(name='Software Developer', number='JD123', location='Cityville')
+        self.job = Job.objects.create(
+            name='Software Developer', 
+            number='JD123', 
+            location='Cityville',
+            company_workgroup = self.cw,
+            )
 
 
         self.date_entry = DateEntry.objects.create(
@@ -204,10 +294,23 @@ class TestJobAdmin(TestCase):
 class TestDateEntryAdmin(TestCase):
     def setUp(self):
         # Create a superuser for logging into the admin site
-        self.user = User.objects.create_superuser(username='admin', password='adminpass', email='admin@example.com')
+        self.wg = Workgroup.objects.create(name="Melbourne")
+        self.cp = Company.objects.create(name="Unisys")
+        self.cw = CompanyWorkgroup.objects.create(company=self.cp, workgroup=self.wg)
 
+        self.user = User.objects.create_superuser(username='admin', password='adminpass', email='admin@example.com')
+        self.userprofile = UserProfile.objects.create(
+            user = self.user,
+            company_workgroup = self.cw,
+        )
         # Create a sample Job for testing
-        self.job = Job.objects.create(name='Software Developer', number='JD123', location='Cityville')
+        self.job = Job.objects.create(
+            name='Software Developer', 
+            number='JD123', 
+            location='Cityville',
+            company_workgroup = self.cw,
+        )
+            
 
         # Create a sample DateEntry for testing
         self.date_entry = DateEntry.objects.create(
@@ -259,23 +362,30 @@ class TestUserProfileModel(TestCase):
         self.assertEqual(users, 0)
 
     def test_should_be_able_to_add_a_company_and_workgroup(self):
+        self.wg = Workgroup.objects.create(name="Melbourne")
+        self.cp = Company.objects.create(name="Unisys")
+        self.cw = CompanyWorkgroup.objects.create(company=self.cp, workgroup=self.wg)
+
         self.user = User.objects.create_superuser(username='admin', password='adminpass', email='admin@example.com')
         self.userprofile = UserProfile.objects.create(
             user = self.user,
-            company = "Unisys",
-            workgroup = "Melbourne",
+            company_workgroup = self.cw,
         )
         users = UserProfile.objects.count()
         self.assertEqual(users, 1)
         user = UserProfile.objects.first()
-        self.assertEqual(user.company,"Unisys")
+        self.assertEqual(user.company_workgroup,self.cw)
 
     def test_should_display_user_profile_in_admin_user_change_screen(self):
         #tests the Stacked Inline and UserAdmin Classes
+        self.wg = Workgroup.objects.create(name="Melbourne")
+        self.cp = Company.objects.create(name="Unisys")
+        self.cw = CompanyWorkgroup.objects.create(company=self.cp, workgroup=self.wg)
+
         self.user = User.objects.create_superuser(username='admin', password='adminpass', email='admin@example.com')
         self.userprofile = UserProfile.objects.create(
             user = self.user,
-            company = "Unisys",
+            company_workgroup = self.cw,
         )
         self.client.login(username='admin', password='adminpass')
 
@@ -288,8 +398,15 @@ class TestUserProfileModel(TestCase):
 
 class TestRestrictedPage(TestCase):
     def setUp(self):
+        self.wg = Workgroup.objects.create(name="Melbourne")
+        self.cp = Company.objects.create(name="Unisys")
+        self.cw = CompanyWorkgroup.objects.create(company=self.cp, workgroup=self.wg)
+
         self.user = User.objects.create_superuser(username='admin', password='adminpass', email='admin@example.com')
- 
+        self.userprofile = UserProfile.objects.create(
+            user = self.user,
+            company_workgroup = self.cw,
+        )
     def test_restricted_page_renders(self):
         url =    "/cal/restricted_page"
         self.client.login(username='admin', password='adminpass')
@@ -302,8 +419,15 @@ class TestAccountFunctionality(TestCase):
     def test_should_be_able_to_login_using_accounts_login(self):
         url = "/accounts/login/"
         response = self.client.get(url)
+        self.wg = Workgroup.objects.create(name="Melbourne")
+        self.cp = Company.objects.create(name="Unisys")
+        self.cw = CompanyWorkgroup.objects.create(company=self.cp, workgroup=self.wg)
+
         self.user = User.objects.create_superuser(username='admin', password='adminpass', email='admin@example.com')
- 
+        self.userprofile = UserProfile.objects.create(
+            user = self.user,
+            company_workgroup = self.cw,
+        )
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Login")

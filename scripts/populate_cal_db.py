@@ -1,5 +1,11 @@
 from datetime import date
-from crewcal.models import Job, DateEntry
+
+from crewcal.models import Job, DateEntry, UserProfile, Workgroup, Company, CompanyWorkgroup
+
+wg = Workgroup.objects.create(name="Melbourne")
+wg1 = Workgroup.objects.create(name="Sydney")
+cp = Company.objects.create(name="Unisys")
+cp1 = Company.objects.create(name="Accenture")
 
 job = Job.objects.create(
             name = "Hibiscus Stage 1",

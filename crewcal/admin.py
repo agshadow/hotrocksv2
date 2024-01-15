@@ -2,16 +2,25 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
 
-from .models import Job, DateEntry, UserProfile
+from crewcal.models import Job, DateEntry, UserProfile, Workgroup, Company, CompanyWorkgroup
 from django.utils.html import format_html
 from django.urls import reverse
 
+@admin.register(Workgroup)
+class WorkgroupAdmin(admin.ModelAdmin):
+    list_display = ('id','name')
 
+@admin.register(Company)
+class CompanyAdmin(admin.ModelAdmin):
+    list_display = ('id','name')  
 
+@admin.register(CompanyWorkgroup)
+class CompanyWorkgroupAdmin(admin.ModelAdmin):
+    list_display = ('id','company', 'workgroup')  
 
 @admin.register(Job)
 class JobAdmin(admin.ModelAdmin):
-    list_display = ('name', 'number', 'location', 'show_dates')  # Fields to display in the list view
+    list_display = ('name', 'number', 'location', 'show_dates','company_workgroup')  # Fields to display in the list view
     search_fields = ('name', 'number', 'location')  # Fields to search for in the admin interface
     
     def show_dates(self, obj):

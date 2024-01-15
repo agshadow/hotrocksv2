@@ -19,6 +19,7 @@ Jobs:
     <TH>Crew</TH>
     <TH>Notes</TH>
     <TH>Quantity</TH>
+    <TH>Workgroup</TH>
     </TR>
     {% for job in jobs %}
     <TD>{{job.date|date:"D, M j"}}</TD>
@@ -26,11 +27,40 @@ Jobs:
     <TD>{{job.crew}}</TD>
     <TD>{{job.notes}}</TD>
     <TD>{{job.quantity}}</TD>
+    <TD>{{job.company_workgroup}}</TD>
     <TR></TR>
     {% endfor %}
 </table>
 
+section 1<BR>
+{{jobs_transposed_by_crew.0}}<BR>
+section 2<BR>
+{{jobs_transposed_by_crew.1.0}}<BR>
+<HR>
+row loop<BR>
+{% for key, val in jobs_transposed_by_crew.1.items %}
+{{val}}<BR>
+{% endfor %}
+end row loop <BR>
 
 
+<table style="width:100%"  class="table table-bordered table-light ">
+    <TR>
+        {% for key,val in jobs_transposed_by_crew.0.items%}
+        <TH>
+            {{val}}
+        </TH> 
+        {% endfor %}
+    </tr>
+    {% for key, row in jobs_transposed_by_crew.1.items%}
+    {{row}}
+    <TR>
+        {% for key,val in row.items %}
+        <TD>{{val}}
+        </TD>
+        {% endfor %}
+    </tr>
+    {% endfor %}
+</table>
 {% endblock content %}
 </html>
