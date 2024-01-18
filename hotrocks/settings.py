@@ -28,8 +28,9 @@ SECRET_KEY = 'django-insecure-3yna)m$78)uu_i^n$#&3k6i0rc!%+d9+5whc^c=y_d-r1)cwzz
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['hotrocksv2.azurewebsites.net']
-
+ALLOWED_HOSTS = ['hotrocksv2.azurewebsites.net', '127.0.0.1']
+CSRF_TRUSTED_ORIGINS = ['https://hotrocksv2.azurewebsites.net']
+#CSRF_TRUSTED_ORIGINS = ['https://'+ os.environ['WEBSITE_HOSTNAME']]
 
 # Application definition
 
