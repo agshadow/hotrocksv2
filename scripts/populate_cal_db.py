@@ -14,6 +14,7 @@ cp1 = Company.objects.create(name="Accenture")
 cw1 = CompanyWorkgroup.objects.create(company=cp1, workgroup=wg1)
 
 user = User.objects.create_user(username='accentureuser', password='adminpass', email='admin@example.com')
+user = User.objects.create_superuser(username='admin', password='adminpass', email='admin@example.com')
  
 userprofile = UserProfile.objects.create(
     user = user,
