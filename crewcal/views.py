@@ -72,11 +72,13 @@ def restricted_page(request):
 def cal_update(request, job_id):
     
     if request.method == "GET":
-        print("method GET")
-        job = get_object_or_404(DateEntry, id = job_id)
-        form = DateEntryForm(instance=job)
-        print(request.GET['datefrom'])
-        print(request.GET['dateto'])
+        if request.GET.get('datefrom') and request.GET.get('dateto'):
+            job = get_object_or_404(DateEntry, id = job_id)
+            form = DateEntryForm(instance=job)
+            print(request.GET.get('datefrom'))
+            print(request.GET.get('dateto'))
+        else:
+            raise Http404("Dates not valid")
         
     else: # POST
         job = get_object_or_404(DateEntry, id = job_id)
