@@ -49,12 +49,8 @@ class DateEntry(models.Model):
     quantity = models.CharField(max_length=100) 
     
     def __str__(self):
-        return (f"DateEntry ID: (\nid={self.id}\n"\
-        f"DateEntry job={self.job}\n"\
-        f"DateEntry date={self.date}\n"\
-        f"DateEntry crew={self.crew}\n"\
-        f")"
-        )
+        return (f"DateEntry ID: id={self.id}, job={self.job.name}, "\
+                f"date={self.date}, crew={self.crew}")
     
     class Meta:
         ordering = ["date", "job__name"]
