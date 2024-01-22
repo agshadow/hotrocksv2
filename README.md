@@ -34,6 +34,9 @@ python manage.py test crewcal.tests.TestHome.test_should_be_able_render_cal_page
 to run individual or groups of tests using Django Awl module:
 python manage.py test =cal_page
 
+To run Coverage:
+coverage run python manage.py test
+
 # To update requirements.txt with new modules
 pip freeze > requirements.txt
 
@@ -59,27 +62,26 @@ it into a django shell
 
 
 # Set Up azure
-now create a resource - webapp
-select docker containerand other info
-and select free plan
+Now create a resource -> webapp
+Select docker container and other info and select free plan
 
-click next to docker
-select private container registry
+Click next to docker and select private container registry
 
-in docker settings
+Private container registry settings settings
 SERVER URL : https://ghcr.io
 USERNAME: your username
-PASSWORD: your PAT from github (from https://github.com/settings/tokens)
+PASSWORD: your PAT from github (create one at https://github.com/settings/tokens)
 FULL IMAGE NAME AND TAg : ghcr.io/<your username>/publish-packages/hotrocksv2:latest
 
-once ths is created you should be able to view your web app.
+Once ths is created you should be able to view your web app.
 
-now turn on the continous deployment:
-Deployment -> deployment center contains the container settings
-turn on continuous deployment and save
+Nnow turn on the continous deployment:
+Deployment -> Deployment Center contains the container settings
+Curn on continuous deployment and save
 
-this continouous deployment creates a webhook resource which will fire which will fire each time we push a container.  
+Continouous Deployment creates a webhook URL we will use when the docker push gets triggered by the github push.
 
-copy the web hook and add it to your github -> repo -> settings - > webhooks
+Copy the Webhook URL.  Go to Github -> Your Repo -> Settings - > Webhooks and create a new webhook.  Use the URL copied, the rest of the settings you can leave as default.
 
-now still in the webapp control panel go to settings->Configuration and add enviornment variables as per the local .env file, to the Application Settings section. Dont forget to save it.
+Now back in azure, in the webapp control panel go to Settings->Configuration and add all of tge enviornment variables in your local .env file to the Application Settings section. Dont forget to save it.
+
