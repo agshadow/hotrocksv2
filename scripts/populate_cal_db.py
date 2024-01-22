@@ -8,14 +8,17 @@ from crewcal.models import Job, DateEntry, UserProfile, Workgroup, Company, Comp
 wg = Workgroup.objects.create(name="Melbourne")
 cp = Company.objects.create(name="Unisys")
 cw = CompanyWorkgroup.objects.create(company=cp, workgroup=wg)
-
+user1 = User.objects.create_superuser(username='admin', password='adminpass', email='admin@example.com')
+userprofile1 = UserProfile.objects.create(
+    user = user1,
+    company_workgroup = cw,
+        )
 wg1 = Workgroup.objects.create(name="Sydney")
 cp1 = Company.objects.create(name="Accenture")
 cw1 = CompanyWorkgroup.objects.create(company=cp1, workgroup=wg1)
 
 user = User.objects.create_user(username='accentureuser', password='adminpass', email='admin@example.com')
-user = User.objects.create_superuser(username='admin', password='adminpass', email='admin@example.com')
- 
+
 userprofile = UserProfile.objects.create(
     user = user,
     company_workgroup = cw1,

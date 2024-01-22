@@ -4,46 +4,17 @@
 {% block content %}
 <h1 class="text-dark">Calendar</h1>
 <p>
-Hello World<P>
+    Date Range: <BR>
+    from: {{datefrom|date:"D, M j"}} <BR>
+    to:   {{dateto|date:"D, M j"}}
+    </p>
 
-</P>
-Date Range: <BR>
-from: {{datefrom|date:"D, M j"}} <BR>
-to:   {{dateto|date:"D, M j"}}
-</p>
-Jobs:
-<table style="width:100%"  class="table table-bordered table-light ">
-    <TR>
-    <TH>Date</TH>
-    <TH>Job</TH>
-    <TH>Crew</TH>
-    <TH>Notes</TH>
-    <TH>Quantity</TH>
-    <TH>Workgroup</TH>
-    </TR>
-    {% for job in jobs %}
-    <TD>{{job.date|date:"D, M j"}}</TD>
-    <TD>{{job.job.name}}</TD>
-    <TD>{{job.crew}}</TD>
-    <TD>{{job.notes}}</TD>
-    <TD>{{job.quantity}}</TD>
-    <TD>{{job.company_workgroup}}</TD>
-    <TR></TR>
-    {% endfor %}
-</table>
-
-section 1<BR>
-{{jobs_transposed_by_crew.0}}<BR>
-section 2<BR>
-{{jobs_transposed_by_crew.1.0}}<BR>
-<HR>
-row loop<BR>
-{% for key, val in jobs_transposed_by_crew.1.items %}
-{{val}}<BR>
-{% endfor %}
-end row loop <BR>
-
-
+    <div class="d-flex justify-content-between">
+        <div class="p-2"><a href="{% url 'cal_home' %}?datefrom={{datefrom|date:"Ymd"}}&dateto={{dateto|date:"Ymd"}}&goto=prev_week">Prev</a>
+        </div>
+        <div class="p-2"><a href="{% url 'cal_home' %}?datefrom={{datefrom|date:"Ymd"}}&dateto={{dateto|date:"Ymd"}}&goto=next_week">Next</a>
+        </div>
+    </div>
 <table style="width:100%"  class="table table-bordered table-light ">
     <TR>
         {% for key,val in jobs_transposed_by_crew.0.items%}
@@ -53,7 +24,7 @@ end row loop <BR>
         {% endfor %}
     </tr>
     {% for key, row in jobs_transposed_by_crew.1.items%}
-    {{row}}
+
     <TR>
         {% for key,val in row.items %}
         <TD>{{val}}
