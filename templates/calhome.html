@@ -27,7 +27,19 @@
 
     <TR>
         {% for key,val in row.items %}
-        <TD>{{val}}
+        <TD>
+            {% if key == '0'%}
+            {{val}}
+            {% else %}
+                {% if val.id %}
+                <a class="btn btn-primary" href="{% url 'cal_home' %}">{{val.job.name}}</a>{{val.id}}
+                <form method="get" action="{% url 'cal_update' val.id %}">
+                    <input type="hidden" name="datefrom" value="{{datefrom|date:'Ymd'}}">
+                    <input type="hidden" name="dateto" value="{{dateto|date:'Ymd'}}">
+                    <button formnovalidate class="btn btn-primary"  >Edit</button>
+                </form>
+                {% endif %}
+            {% endif %}
         </TD>
         {% endfor %}
     </tr>

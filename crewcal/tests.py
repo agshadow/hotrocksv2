@@ -4,6 +4,7 @@ from datetime import date
 from .models import Job, DateEntry, UserProfile, Workgroup, CompanyWorkgroup, Company
 from django.contrib.auth.models import User
 from crewcal.utils import transpose_dates, get_calendar_for_date_range
+from crewcal.forms import DateEntryForm
 
 class TestCalHome(TestCase):       
     def setUp(self):
@@ -584,3 +585,69 @@ class TestGetCalendarForWeek(TestCase):
         self.assertTrue("1" in formatted_data["0"])
         self.assertTrue("7" in formatted_data["0"])
         self.assertIn("Jeff", formatted_data["0"]["0"])
+
+
+
+
+
+class TestDateEntryForm(TestCase):
+    def setUp(self):
+        self.form = DateEntryForm
+
+    def test_should_be_able_to_create_valid_date_entry_form(self):
+        
+        self.assertTrue(issubclass(self.form, DateEntryForm))
+        #check fields are in the meta
+        self.assertTrue('notes' in self.form.Meta.fields)
+        self.assertTrue('quantity' in self.form.Meta.fields)
+        self.assertTrue('date' in self.form.Meta.fields)
+        self.assertTrue('crew' in self.form.Meta.fields)
+
+class TestCalendarUpdatePage(TestCase):
+    def setUp(self):
+        self.wg = Workgroup.objects.create(name="Melbourne")
+        self.cp = Company.objects.create(name="Unisys")
+        self.cw = CompanyWorkgroup.objects.create(company=self.cp, workgroup=self.wg)
+
+        self.job = Job.objects.create(
+            name = "Hibiscus Stage 1",
+            number = "22-02-4423",
+            location = "Grange Road, Plumpton",
+            company_workgroup = self.cw,
+        )
+        self.entry1 = DateEntry.objects.create(
+            job = self.job,
+            date = date(2024, 1, 8),
+            crew = "Jeff",
+            notes = "Prime and Sami",
+            quantity = "300T 10N",
+        )
+        self.entry2 = DateEntry.objects.create(
+            job = self.job,
+            date = date(2024,1,9),
+            crew = "Jeff",
+            notes = "Prime and Sami",
+            quantity = "300T 7N",
+        )
+        self.entry3 = DateEntry.objects.create(
+            job = self.job,
+            date = date(2024,1,10),
+            crew = "Jeff",
+            notes = "Prime and Sami",
+            quantity = "300T 20SI",
+        )
+        self.form = DateEntryForm
+
+    def test_should_render_update_page_with_correct_response(self):
+        url = f"/cal/update/{self.entry1.id}/?datefrom=20240108&dateto=20240114"
+        response = self.client.get(url)
+
+        self.assertTemplateUsed(response, 'update.html')
+        self.assertEqual(response.status_code,200)
+
+    def test_should_return_404_if_date_range_missing(self):
+        url = f"/cal/update/{self.entry1.id}/"
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code,404)
+        

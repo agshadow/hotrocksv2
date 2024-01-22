@@ -1,9 +1,12 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from django.http import Http404
+from django.urls import reverse
 
 from datetime import date, datetime, timedelta
 from crewcal.models import DateEntry
 from crewcal.utils import transpose_dates, get_calendar_for_date_range
+from crewcal.forms import DateEntryForm
 
 def home(request):
     return render(request, "home.html")
@@ -45,10 +48,6 @@ def cal_home(request):
                 
             }
 
-
-
-
-        profile = request.user.userprofile
     else: # PUT
         pass
     
@@ -69,3 +68,26 @@ def restricted_page(request):
     }
     
     return render(request, "general.html", data)
+
+def cal_update(request, job_id):
+    
+    if request.method == "GET":
+        print("method GET")
+        job = get_object_or_404(DateEntry, id = job_id)
+        form = DateEntryForm(instance=job)
+        print(request.GET['datefrom'])
+        print(request.GET['dateto'])
+        
+    else: # POST
+        job = get_object_or_404(DateEntry, id = job_id)
+        form = DateEntryForm(request.POST, instance=job)
+        if form.is_valid():
+            form.save()
+            
+            parm = f"?datefrom={request.GET['datefrom']}&dateto={request.GET['dateto']}"
+            return redirect(reverse('cal_home') +parm)
+           
+    data = {
+        "form": form,
+    }
+    return render(request, "update.html", data)

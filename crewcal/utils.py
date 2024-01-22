@@ -45,7 +45,7 @@ def get_calendar_for_date_range(request, datefrom = date.today(), dateto = date.
             for job in jobs:
                 if job.date == current_date and job.crew == crew:  
                     #print(f"found job : {job.job.name} - {job.date}")
-                    job_name = job.job.name
+                    job_name = job
             crew_jobs.update({str(n+1): job_name})
         #print (counter,crew_jobs)  
         jobs_to_return.update( {str(counter) : crew_jobs})
