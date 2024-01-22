@@ -1,0 +1,11 @@
+<!-- RiffMates/templates/home.html -->
+{% extends "base.html" %} {% load static %} {% block content %}
+<img src="{% static 'img/logo.png' %}" height="100" />
+<h1>Welcome to Hotrocks Version 2!</h1>
+
+<ul>
+  <li><a href="{% url 'cal_home' %}">Calendar</a></li>
+  <li><a href="{% url 'list_reports' %}">Incident Report</a></li>
+</ul>
+
+{% endblock content %}
