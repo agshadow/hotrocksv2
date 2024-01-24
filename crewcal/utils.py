@@ -51,3 +51,13 @@ def get_calendar_for_date_range(request, datefrom = date.today(), dateto = date.
         jobs_to_return.update( {str(counter) : crew_jobs})
     #print(jobs_to_return)
     return jobs_to_return
+
+def start_of_week(date=date.today()):
+
+
+    # Calculate the difference in days between the current day and the start of the week (Monday)
+    days_until_start_of_week = date.weekday()
+    # Calculate the start of the week by subtracting the difference
+    start_of_week = date - timedelta(days=days_until_start_of_week)
+
+    return start_of_week

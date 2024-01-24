@@ -17,6 +17,8 @@
         <TD align="center"><a href={% url 'home' %}>Home</a></TD>
         <TD align="center"><a href={% url 'cal_home' %}>Calendar</a></TD>
         <TD align="center"><a href={% url 'list_reports' %}>Incident Reports</a></TD>
+        <TD align="center"><a href={% url 'create_job' %}>Add Job</a></TD>
+        <TD align="center"><a href={% url 'create_date' %}>Add Date</a></TD>
         <TD align="center">
           {% if user.is_authenticated %}
             {{user.username}}

@@ -5,8 +5,8 @@ from django.urls import reverse
 
 from datetime import date, datetime, timedelta
 from crewcal.models import DateEntry
-from crewcal.utils import transpose_dates, get_calendar_for_date_range
-from crewcal.forms import DateEntryForm
+from crewcal.utils import transpose_dates, get_calendar_for_date_range, start_of_week
+from crewcal.forms import DateEntryForm, JobForm, DateEntryForm1
 
 def home(request):
     return render(request, "home.html")
@@ -20,10 +20,10 @@ def cal_home(request):
             datefrom = date.fromisoformat(request.GET.get("datefrom"))
             dateto = date.fromisoformat(request.GET.get("dateto"))
         else:
-            datetimefrom = datetime.now()
-            dateto = datetimefrom + timedelta(days=7)
-            dateto  = dateto.date()
-            datefrom  = datetimefrom.date()
+            today = date.today()
+            datefrom = start_of_week(today)
+
+            dateto = datefrom + timedelta(days=7)
         
         if (request.GET.get('goto')):
             if request.GET.get('goto') == "prev_week":
@@ -93,3 +93,44 @@ def cal_update(request, job_id):
         "form": form,
     }
     return render(request, "update.html", data)
+
+def create_job(request):
+    if request.method == "GET": 
+        job_form = JobForm()
+    else: #POST      
+        job_form = JobForm(request.POST)
+
+
+
+        if job_form.is_valid() :
+            job_form = job_form.save()
+            return redirect("home")
+        
+    data = {
+        "heading" : "Create Job",
+        "form": job_form,
+    }
+    return render(request, 'create.html', data)
+
+
+def create_date(request):
+    if request.method == "GET": 
+        date_form = DateEntryForm1()
+    else: #POST      
+        date_form = DateEntryForm1(request.POST)
+        #print("inside create_date")
+        #print(date_form)
+
+
+        #print ("checking if valid")
+        #print(date_form.cleaned_data)
+        if date_form.is_valid():
+            #print("form  valid")
+            date_form = date_form.save()
+            return redirect("home")
+        #print("form not valid")
+    data = {
+        "heading" : "Create Date",
+        "form": date_form,
+    }
+    return render(request, 'create.html', data)
