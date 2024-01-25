@@ -32,7 +32,16 @@
             {{val}}
             {% else %}
                 {% if val.id %}
-                <a class="btn btn-primary" href="{% url 'cal_home' %}">{{val.job.name}}</a>{{val.id}}
+                <button type="button" class="btn btn-secondary"  data-bs-toggle="tooltip" data-bs-placement="left"
+                title="{{ val.job.name }}
+{{val.job.number}}
+{{val.quantity}}
+{{val.notes}}">
+                {{val.job.name}}
+                </button>
+                    
+
+
                 <form method="get" action="{% url 'cal_update' val.id %}">
                     <input type="hidden" name="datefrom" value="{{datefrom|date:'Ymd'}}">
                     <input type="hidden" name="dateto" value="{{dateto|date:'Ymd'}}">
