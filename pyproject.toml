@@ -1,0 +1,7 @@
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
+
+[tool.ruff]
+extend-exclude = ["*migrations*","scripts","c:/Users/*"]

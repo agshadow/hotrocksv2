@@ -1,7 +1,6 @@
 from django.shortcuts import render, get_object_or_404, get_list_or_404, redirect
 from report.models import IncidentReport, IncidentTypeChoice, IncidentReportFiles
 from django.core.paginator import Paginator
-from datetime import datetime, timezone
 import io
 
 import uuid
@@ -10,7 +9,6 @@ from reportlab.pdfgen import canvas
 from django.core import serializers
 from report.forms import IncidentReportForm, ReadOnlyIncidentReportForm, UpdateIncidentReportForm, \
     IncidentReportFileForm
-from report.tables import IncidentReportTable
 
 def _get_items_per_page(request):
     # Determine how many items to show per page, disallowing <1 or >50
@@ -121,7 +119,7 @@ def new_report(request):
                 f = request.FILES['file'].name
                 request.FILES['file'].name = str(uuid.uuid4())
                 #incident_report_file_form = IncidentReportFileForm(request.POST, request.FILES, instance=report)
-                incident_report_file = IncidentReportFiles.objects.create(
+                IncidentReportFiles.objects.create(
                     incident_report = report,
                     filename = f, 
                     file=request.FILES['file'])

@@ -1,7 +1,6 @@
 from django.urls import path
 
 from report import views
-from report.tables import IncidentReportTable
 
 urlpatterns = [
     path("list_reports/", views.list_reports, name="list_reports"),
