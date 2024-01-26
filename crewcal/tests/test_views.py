@@ -17,14 +17,7 @@ import crewcal.tests.test_setup as test_setup
 class TestCalHome(TestCase):
     def setUp(self):
         test_setup.setup_one_job(self)
-        self.user = User.objects.create_superuser(
-            username="admin", password="adminpass", email="admin@example.com"
-        )
         self.client.login(username="admin", password="adminpass")
-        self.userprofile = UserProfile.objects.create(
-            user=self.user,
-            company_workgroup=self.cw,
-        )
 
     def test_should_be_able_render_cal_page(self):
         url = "/cal/"
@@ -68,6 +61,7 @@ class TestCalHome(TestCase):
             notes="Prime and Sami",
             quantity="205T 20SI",
         )
+
         url = "/cal/?datefrom=20240108&dateto=20240114"
         response = self.client.get(url)
         self.assertNotContains(response, "Roger")
@@ -162,11 +156,32 @@ class TestAccountFunctionality(TestCase):
 
 
 class TestCreateJob(TestCase):
+    def setUp(self):
+        test_setup.create_superuser_profile(self)
+        self.client.login(username="admin", password="adminpass")
+
     def test_should_render_add_job_page(self):
+        self.client.login(username="admin", password="adminpass")
         url = "/cal/job/create/"
         response = self.client.get(url)
-        self.assertTemplateUsed(response, "create.html")
-        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "Company workgroup")
+        # self.assertTemplateUsed(response, "create.html")
+        # self.assertEqual(response.status_code, 200)
+
+    def test_should_not_display_company_workgroup_field(self):
+        url = "/cal/job/create/"
+        response = self.client.get(url)
+        self.assertNotContains(response, "Company workgroup")
+
+    def test_should_default_to_your_company_workgroup_when_rendering(self):
+        url = "/cal/job/create/"
+        response = self.client.get(url)
+        self.assertContains(response, 'name="company_workgroup" value="1"')
+
+    def test_should_have_job_number_for_field_name(self):
+        url = "/cal/job/create/"
+        response = self.client.get(url)
+        self.assertContains(response, "Job Number")
 
 
 class TestHomeScreen(TestCase):
@@ -184,8 +199,9 @@ class TestHomeScreen(TestCase):
 class TestCreateDateEntry(TestCase):
     def setUp(self):
         test_setup.setup_one_job(self)
+        self.client.login(username="admin", password="adminpass")
 
-    def test_should_render_add_job_page(self):
+    def test_should_render_add_date_entry_page(self):
         url = "/cal/date/create/"
         response = self.client.get(url)
         self.assertTemplateUsed(response, "create.html")

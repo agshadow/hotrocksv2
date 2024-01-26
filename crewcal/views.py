@@ -95,9 +95,13 @@ def cal_update(request, job_id):
     return render(request, "update.html", data)
 
 
+@login_required
 def create_job(request):
     if request.method == "GET":
-        job_form = JobForm()
+        initial_values = {
+            "company_workgroup": request.user.userprofile.company_workgroup
+        }
+        job_form = JobForm(initial=initial_values)
     else:  # POST
         job_form = JobForm(request.POST)
 
@@ -112,6 +116,7 @@ def create_job(request):
     return render(request, "create.html", data)
 
 
+@login_required
 def create_date(request):
     if request.method == "GET":
         date_form = DateEntryForm1()

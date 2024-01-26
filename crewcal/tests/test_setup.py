@@ -16,6 +16,13 @@ def setup_one_job(self):
     self.cp = Company.objects.create(name="Unisys")
     self.cw = CompanyWorkgroup.objects.create(company=self.cp, workgroup=self.wg)
 
+    self.user = User.objects.create_superuser(
+        username="admin", password="adminpass", email="admin@example.com"
+    )
+    self.userprofile = UserProfile.objects.create(
+        user=self.user,
+        company_workgroup=self.cw,
+    )
     self.job = Job.objects.create(
         name="Hibiscus Stage 1",
         number="22-02-4423",
