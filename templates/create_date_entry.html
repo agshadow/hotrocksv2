@@ -1,0 +1,44 @@
+<!-- create_date_entry.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2>Create Date Entry</h2>
+  <form method="post" action="{% url 'create_date_entry' %}">
+    {% csrf_token %}
+    <div class="row">
+      <div class="col-md-5">
+    <div class="input-group">
+        <input type="text" id="id_search_job" name="search_job" placeholder="Search jobs..." class="form-control">
+        <div class="input-group-append">
+          <button type="button" class="btn btn-primary" id="btn_search_job">Search</button>
+        </div>
+      </div>
+    </div>
+</div>
+    {{ form.as_p }}<button type="submit">Submit</button>
+    
+  </form>
+
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  <!-- Add this to the script section of your HTML template -->
+<script>
+    $(document).ready(function () {
+      $('#btn_search_job').on('click', function () {
+        console.log('Search button clicked!');
+        var search_term = $('#id_search_job').val();
+        $.ajax({
+          url: '{% url "job_search" %}',
+          data: {'search_term': search_term},
+          dataType: 'json',
+          success: function (data) {
+            var jobOptions = data.jobs.map(function (job) {
+              return '<option value="' + job.id + '">' + job.name + ' - ' + job.number + '</option>';
+            });
+            $('#id_job').html(jobOptions.join(''));
+          }
+        });
+      });
+    });
+  </script>
+  
+{% endblock %}

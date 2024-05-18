@@ -10,9 +10,9 @@
     </p>
 
     <div class="d-flex justify-content-between">
-        <div class="p-2"><a href="{% url 'cal_home' %}?datefrom={{datefrom|date:"Ymd"}}&dateto={{dateto|date:"Ymd"}}&goto=prev_week">Prev</a>
+        <div class="p-2"><a href="{% url 'cal_home' %}?datefrom={{datefrom|date:"Ymd"}}&goto=prev_week">Prev</a>
         </div>
-        <div class="p-2"><a href="{% url 'cal_home' %}?datefrom={{datefrom|date:"Ymd"}}&dateto={{dateto|date:"Ymd"}}&goto=next_week">Next</a>
+        <div class="p-2"><a href="{% url 'cal_home' %}?datefrom={{datefrom|date:"Ymd"}}&goto=next_week">Next</a>
         </div>
     </div>
 <table style="width:100%"  class="table table-bordered table-light ">

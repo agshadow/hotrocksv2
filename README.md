@@ -40,6 +40,8 @@ coverage run python manage.py test
 # To update requirements.txt with new modules
 pip freeze > requirements.txt
 
+# Run locally
+python manage.py runserver
 
 # SET UP Postgres
 
@@ -85,3 +87,5 @@ Copy the Webhook URL.  Go to Github -> Your Repo -> Settings - > Webhooks and cr
 
 Now back in azure, in the webapp control panel go to Settings->Configuration and add all of tge enviornment variables in your local .env file to the Application Settings section. Dont forget to save it.
 
+# View database
+you can use PGadmin to view the database

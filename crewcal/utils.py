@@ -61,11 +61,33 @@ def get_calendar_for_date_range(request, datefrom=date.today(), dateto=date.toda
     return jobs_to_return
 
 
-def start_of_week(date=date.today()):
-    # Calculate the difference in days between the current day and the start of the
-    # week (Monday)
-    days_until_start_of_week = date.weekday()
-    # Calculate the start of the week by subtracting the difference
-    start_of_week = date - timedelta(days=days_until_start_of_week)
+def start_of_week(d=date.today()):
+    """Return the Sunday of the week containing the date d."""
+    return d - timedelta(days=d.weekday() + 1 if d.weekday() != 6 else 0)
 
-    return start_of_week
+
+def check_if_date_is_sunday(date):
+    return date.weekday() == 6
+
+
+def _get_items_per_page(request):
+    # Determine how many items to show per page, disallowing <1 or >50
+    items_per_page = int(request.GET.get("items_per_page", 10))
+    if items_per_page < 1:
+        items_per_page = 10
+    if items_per_page > 50:
+        items_per_page = 50
+
+    return items_per_page
+
+
+def _get_page_num(request, paginator):
+    # Get current page number for Pagination, using reasonable defaults
+    page_num = int(request.GET.get("page", 1))
+
+    if page_num < 1:
+        page_num = 1
+    elif page_num > paginator.num_pages:
+        page_num = paginator.num_pages
+
+    return page_num
