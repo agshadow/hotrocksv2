@@ -11,6 +11,9 @@ urlpatterns = [
     path("job/delete/<int:report_id>/", views.delete_job, name="delete_job"),
     path("jobs/view/", views.view_jobs, name="view_jobs"),
     path("date/create/", views.create_date, name="create_date"),
+    path("shift/read/", views.read_shift, name="read_shift"),
+    path("shift/update/<int:report_id>/", views.update_shift, name="update_shift"),
+    path("shift/delete/<int:report_id>/", views.delete_shift, name="delete_shift"),
     path("create_date_entry/", views.create_date_entry, name="create_date_entry"),
     path("job_search/", views.job_search, name="job_search"),
 ]

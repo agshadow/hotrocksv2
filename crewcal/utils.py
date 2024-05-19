@@ -72,7 +72,7 @@ def check_if_date_is_sunday(date):
 
 def _get_items_per_page(request):
     # Determine how many items to show per page, disallowing <1 or >50
-    items_per_page = int(request.GET.get("items_per_page", 10))
+    items_per_page = int(request.GET.get("items_per_page", 50))
     if items_per_page < 1:
         items_per_page = 10
     if items_per_page > 50:

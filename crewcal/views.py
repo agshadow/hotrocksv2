@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import Http404, JsonResponse
+from django.contrib import messages
 from django.urls import reverse
 from django.core.paginator import Paginator
 from datetime import date, timedelta
@@ -209,3 +210,45 @@ def update_job(request, report_id):
 
 def delete_job(request, report_id):
     pass
+
+
+@login_required
+def read_shift(request):
+    # all_shifts = DateEntry.objects.all().order_by("date")
+    # objects.filter(company_workgroup=request.user.userprofile.company_workgroup).
+    user_profile = request.user.userprofile
+    all_shifts = DateEntry.objects.filter(
+        job__company_workgroup=user_profile.company_workgroup
+    ).order_by("date")
+
+    items_per_page = _get_items_per_page(request)
+    paginator = Paginator(all_shifts, items_per_page)
+    page_num = _get_page_num(request, paginator)
+    page = paginator.page(page_num)
+    data = {
+        "reports": page.object_list,
+        "page": page,
+    }
+
+    return render(request, "read_shift.html", data)
+
+
+def update_shift(request, report_id):
+    pass
+
+
+@login_required
+def delete_shift(request, report_id):
+    # Retrieve the DateEntry object or return a 404 error if not found
+    shift = get_object_or_404(DateEntry, id=report_id)
+
+    # Ensure the user is allowed to delete this shift
+    user_profile = request.user.userprofile
+    if shift.job.company_workgroup != user_profile.company_workgroup:
+        messages.error(request, "You do not have permission to delete this shift.")
+        return redirect("read_shift")  # Redirect to the shifts list or appropriate page
+
+    # If the user has permission, delete the shift
+    shift.delete()
+    messages.success(request, "Shift deleted successfully.")
+    return redirect("read_shift")  # Redirect to the shifts list or appropriate page

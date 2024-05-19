@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Hotrocks - Shifts{% endblock title %}
+
+{% block content %}
+<h1 class="text-dark">Shifts</h1>
+
+<p>
+  <a href="{% url 'create_date ' %}">New Shift</a>
+</p>
+<table style="width:100%"  class="table table-bordered table-light ">
+  <thead>
+    <tr style='background-color:white'>
+      <th>Job</th>
+      <th>Date</th>
+      <th>Crew</th>
+      <th>Notes</th>
+      <th>Quantity</th>
+    </tr>
+  </thead>
+  <tbody class="table-group-divider">
+    {% for item in reports %}
+    <tr style='background-color:{% cycle 'LightGray' 'SeaShell' %}' >
+      <td>{{item.job.name}}</td>
+      <td>{{item.date}}</td>
+      <td>{{item.crew}}</td>
+      <td>{{item.notes}}</td>
+      <td>{{item.Quantity}}</td>
+      <td> 
+        <div class="d-flex p-2"><form method="get" action="{% url 'update_shift'  item.id %}">
+          <button formnovalidate class="btn btn-primary"  >Edit</button>
+        </form>
+        <form method="get" action="{% url 'delete_shift'  item.id %}">
+          <button formnovalidate class="btn btn-primary"  >Delete</button>
+        </form></td></div></td>
+    </tr>
+    {% empty %}
+    <tr style='background-color:{% cycle 'LightGreen' 'LightSalmon' %}' >
+      <td>No Reports in the database</td><td></td><td></td><td></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock content %}
+</html>
