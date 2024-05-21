@@ -1,6 +1,7 @@
 from django import forms
 from crewcal.models import DateEntry, Job, UserProfile
 from django.forms import DateInput
+from datetime import date, timedelta
 
 DateEntryForm = forms.modelform_factory(
     DateEntry,
@@ -21,6 +22,8 @@ DateEntryForm = forms.modelform_factory(
 
 
 class DateEntryForm1(forms.ModelForm):
+    days = forms.IntegerField(min_value=1, label="Days")
+
     class Meta:
         model = DateEntry
         fields = ["job", "date", "crew", "notes", "quantity"]
@@ -29,23 +32,38 @@ class DateEntryForm1(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        print("in dateEntryForm1.__init__ ")
-        user = kwargs.pop("user", None)
+        self.user = kwargs.pop("user", None)
         super(DateEntryForm1, self).__init__(*args, **kwargs)
-        if user:
-            print("in if uer")
+        if self.user:
             try:
-                user_profile = UserProfile.objects.get(user=user)
-                print(user_profile)
+                user_profile = UserProfile.objects.get(user=self.user)
                 company_workgroup = user_profile.company_workgroup
-                print(company_workgroup)
                 self.fields["job"].queryset = Job.objects.filter(
                     company_workgroup=company_workgroup
                 )
             except UserProfile.DoesNotExist:
                 self.fields["job"].queryset = Job.objects.none()
-        else:
-            print("in if-user-else statement")
+
+    def save_multiple_entries(self):
+        job = self.cleaned_data["job"]
+        date = self.cleaned_data["date"]
+        days = self.cleaned_data["days"]
+        crew = self.cleaned_data["crew"]
+        notes = self.cleaned_data["notes"]
+        quantity = self.cleaned_data["quantity"]
+
+        entries = []
+        for i in range(days):
+            entry = DateEntry(
+                job=job,
+                date=date + timedelta(days=i),
+                crew=crew,
+                notes=notes,
+                quantity=quantity,
+            )
+            entries.append(entry)
+
+        DateEntry.objects.bulk_create(entries)
 
 
 JobForm = forms.modelform_factory(

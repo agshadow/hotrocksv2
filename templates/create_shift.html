@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Hotrocks {{heading}}{% endblock title %}
+
+{% block content %}
+<h1 class="text-dark">{{heading}}</h1>
+<p>
+  <form method="post">
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="{{ form.job.id_for_label }}">Job:</label>
+        {{ form.job }}
+        {{ form.job.errors }}
+    </div>
+    <div class="form-group">
+        <label for="{{ form.date.id_for_label }}">Date:</label>
+        {{ form.date }}
+        {{ form.date.errors }}
+    </div>
+    <div class="form-group">
+        <label for="{{ form.days.id_for_label }}">Days:</label>
+        {{ form.days }}
+        {{ form.days.errors }}
+    </div>
+    <div class="form-group">
+        <label for="{{ form.crew.id_for_label }}">Crew:</label>
+        {{ form.crew }}
+        {{ form.dacrewys.errors }}
+    </div>
+    <div class="form-group">
+        <label for="{{ form.notes.id_for_label }}">Notes:</label>
+        {{ form.notes }}
+        {{ form.notes.errors }}
+    </div>
+    <div class="form-group">
+        <label for="{{ form.quantity.id_for_label }}">Quantity:</label>
+        {{ form.quantity }}
+        {{ form.quantity.errors }}
+    </div>
+    <!-- Include other fields here -->
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+</p>
+
+
+{% endblock content %}
+</html>

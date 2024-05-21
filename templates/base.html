@@ -22,7 +22,7 @@
         <TD align="center"><a href={% url 'view_jobs' %}>View Jobs</a></TD>
         <TD align="center"><a href={% url 'create_job' %}>Add Job</a></TD>
         <TD align="center"><a href={% url 'read_shift' %}>View Shifts</a></TD>
-        <TD align="center"><a href={% url 'create_date' %}>Add Date</a></TD>
+        <TD align="center"><a href={% url 'create_shift' %}>Add Date</a></TD>
         <TD align="center">
           {% if user.is_authenticated %}
             {{user.username}}

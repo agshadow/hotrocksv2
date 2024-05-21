@@ -230,7 +230,7 @@ class TestCreateDateEntry(TestCase):
             "heading": "Create Date",
             "form": date_form.cleaned_data,
         }
-        url = reverse("create_date")  # Use reverse to generate the URL dynamically
+        url = reverse("create_shift")  # Use reverse to generate the URL dynamically
         self.client.post(url, data)
 
         # commented out because I cant get the data to be valid when it goes

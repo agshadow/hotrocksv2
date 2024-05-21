@@ -136,35 +136,26 @@ def get_sunday(d):
 
 
 @login_required
-def create_date(request):
-    print("in create_date")
-    if request.method == "GET":
-        print("in GET")
-        date_form = DateEntryForm1(user=request.user)
-    else:  # POST
-        date_form = DateEntryForm1(request.POST)
-        # print("inside create_date")
-        # print(date_form)
-
-        # print ("checking if valid")
-        # print(date_form.cleaned_data)
+def create_shift(request):
+    if request.method == "POST":
+        date_form = DateEntryForm1(request.POST, user=request.user)
         if date_form.is_valid():
-            # print("form  valid")
-            date_form = date_form.save()
+            date_form.save_multiple_entries()
+            # Extract the submitted date from the form data
+            submitted_date = date_form.cleaned_data["date"]
 
-            entry_date = date_form.date
-            # Calculate the Sunday of the week containing entry_date
-            datefrom = get_sunday(entry_date)
-            dateto = entry_date + timedelta(days=7)
-            # Construct the URL with query parameters
-            parm = f"?datefrom={datefrom.isoformat()}"
-            return redirect(reverse("cal_home") + parm)
-        # print("form not valid")
+            # Redirect to the calendar home page with the submitted date
+            return redirect(
+                reverse("cal_home") + f"?datefrom={submitted_date.isoformat()}"
+            )
+    else:
+        date_form = DateEntryForm1(user=request.user)
+
     data = {
         "heading": "Create Date",
         "form": date_form,
     }
-    return render(request, "create.html", data)
+    return render(request, "create_shift.html", data)
 
 
 def job_search(request):
