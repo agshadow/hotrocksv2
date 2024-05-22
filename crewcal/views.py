@@ -195,12 +195,28 @@ def view_jobs(request):
     return render(request, "view_jobs.html", data)
 
 
-def update_job(request, report_id):
+def update_job(request, job_id):
     pass
 
 
-def delete_job(request, report_id):
-    pass
+@login_required
+def delete_job(request, job_id):
+    # Retrieve the Job object or return a 404 error if not found
+    job = get_object_or_404(Job, id=job_id)
+
+    # Ensure the user is allowed to delete this job
+    user_profile = request.user.userprofile
+    if job.company_workgroup != user_profile.company_workgroup:
+        messages.error(request, "You do not have permission to delete this job.")
+        return redirect("view_jobs")  # Redirect to the jobs list or appropriate page
+
+    if request.method == "POST":
+        # If the user has permission, delete the job
+        job.delete()
+        messages.success(request, "Job deleted successfully.")
+        return redirect("view_jobs")  # Redirect to the jobs list or appropriate page
+
+    return render(request, "confirm_delete_job.html", {"job": job})
 
 
 @login_required
@@ -228,7 +244,6 @@ def update_shift(request, report_id):
     pass
 
 
-@login_required
 def delete_shift(request, report_id):
     # Retrieve the DateEntry object or return a 404 error if not found
     shift = get_object_or_404(DateEntry, id=report_id)
@@ -239,7 +254,10 @@ def delete_shift(request, report_id):
         messages.error(request, "You do not have permission to delete this shift.")
         return redirect("read_shift")  # Redirect to the shifts list or appropriate page
 
-    # If the user has permission, delete the shift
-    shift.delete()
-    messages.success(request, "Shift deleted successfully.")
-    return redirect("read_shift")  # Redirect to the shifts list or appropriate page
+    if request.method == "POST":
+        # If the user has permission, delete the shift
+        shift.delete()
+        messages.success(request, "Shift deleted successfully.")
+        return redirect("read_shift")  # Redirect to the shifts list or appropriate page
+
+    return render(request, "confirm_delete_shift.html", {"shift": shift})

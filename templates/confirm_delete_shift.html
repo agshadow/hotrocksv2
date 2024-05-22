@@ -1,0 +1,12 @@
+<!-- confirm_delete_shift.html -->
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>Confirm Deletion</h2>
+  <p>Are you sure you want to delete the shift on {{ shift.date }} for job {{ shift.job.name }}?</p>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Confirm</button>
+    <a href="{% url 'read_shift' %}" class="btn btn-secondary">Cancel</a>
+  </form>
+{% endblock %}

@@ -1,0 +1,12 @@
+<!-- confirm_delete_job.html -->
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>Confirm Deletion</h2>
+  <p>Are you sure you want to delete the job {{ job.name }} ({{ job.number }})?</p>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Confirm</button>
+    <a href="{% url 'view_jobs' %}" class="btn btn-secondary">Cancel</a>
+  </form>
+{% endblock %}
