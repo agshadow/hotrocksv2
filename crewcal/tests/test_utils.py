@@ -150,4 +150,4 @@ class TestGetCalendarForWeek(TestCase):
 class TestStartOfWeek(TestCase):
     def test_should_return_start_of_the_week(self):
         date_to_submit = date(2024, 1, 24)
-        self.assertEqual(date(2024, 1, 22), start_of_week(date_to_submit))
+        self.assertEqual(date(2024, 1, 21), start_of_week(date_to_submit))

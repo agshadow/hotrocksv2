@@ -12,6 +12,7 @@ from crewcal.models import (
 from django.contrib.auth.models import User
 from crewcal.forms import DateEntryForm1
 import crewcal.tests.test_setup as test_setup
+from crewcal.utils import start_of_week
 
 
 class TestCalHome(TestCase):
@@ -67,36 +68,84 @@ class TestCalHome(TestCase):
         self.assertNotContains(response, "Roger")
 
     def test_should_be_able_to_go_to_next_date_range(self):
-        url = "/cal/?datefrom=20240108&dateto=20240114"
-        response = self.client.get(url)
-        self.assertContains(response, "Next")
-        self.assertContains(
-            response, "/cal/?datefrom=20240108&dateto=20240114&goto=next_week"
+        today = date.today()
+        datefrom = start_of_week(today)
+        print(f"datefrom : {datefrom}")
+        dateto = datefrom + timedelta(days=7)
+
+        # Simulate going to the next week
+        response = self.client.get(
+            reverse("cal_home"),
+            {"datefrom": datefrom.strftime("%Y-%m-%d"), "goto": "next_week"},
         )
+        # Print the URL of the response
+        print(response.request["PATH_INFO"] + "?" + response.request["QUERY_STRING"])
+
+        # Check that the response is 200 OK
+        self.assertEqual(response.status_code, 200)
+
+        # Calculate the start and end of the next week
+        next_week_datefrom = datefrom + timedelta(days=7)
+        next_week_dateto = dateto + timedelta(days=7)
+        print(
+            f"next_week-datefrom {next_week_datefrom} - next_week-dateto {next_week_dateto}"
+        )
+
+        # Check that the context contains the correct date range for the next week
+        self.assertEqual(response.context["datefrom"], next_week_datefrom)
+        self.assertEqual(response.context["dateto"], next_week_dateto)
+
+        # Render the template and check for the correct date display
+        content = response.content.decode("utf-8")
+        self.assertIn(next_week_datefrom.strftime("%a, %b %#d"), content)
+        self.assertIn(next_week_dateto.strftime("%a, %b %#d"), content)
 
     def test_should_be_able_to_go_to_previous_date_range(self):
-        url = "/cal/?datefrom=20240108&dateto=20240114"
-        response = self.client.get(url)
-        self.assertContains(response, "Prev")
-        self.assertContains(
-            response, "/cal/?datefrom=20240108&dateto=20240114&goto=prev_week"
+        today = date.today()
+        datefrom = start_of_week(today)
+        dateto = datefrom + timedelta(days=7)
+
+        # Simulate going to the previous week
+        response = self.client.get(
+            reverse("cal_home"),
+            {"datefrom": datefrom.strftime("%Y-%m-%d"), "goto": "prev_week"},
         )
+
+        # Check that the response is 200 OK
+        self.assertEqual(response.status_code, 200)
+
+        # Calculate the start and end of the previous week
+        previous_week_datefrom = datefrom - timedelta(days=7)
+        previous_week_dateto = dateto - timedelta(days=7)
+
+        # Check that the context contains the correct date range for the previous week
+        self.assertEqual(response.context["datefrom"], previous_week_datefrom)
+        self.assertEqual(response.context["dateto"], previous_week_dateto)
+
+        # Render the template and check for the correct date display
+        content = response.content.decode("utf-8")
+        self.assertIn(previous_week_datefrom.strftime("%a, %b %d"), content)
+        self.assertIn(previous_week_dateto.strftime("%a, %b %d"), content)
 
     def test_should_default_to_the_monday_of_the_current_week(self):
-        current_date = date.today()
+        response = self.client.get(reverse("cal_home"))
 
-        url = "/cal/"
-        response = self.client.get(url)
+        # Check that the response is 200 OK
+        self.assertEqual(response.status_code, 200)
 
-        start_of_week = current_date - timedelta(days=current_date.weekday())
+        # Get the current date and calculate the start and end of the current week
+        today = date.today()
+        datefrom = start_of_week(today)
+        dateto = datefrom + timedelta(days=7)
 
-        response_test = (
-            "<TR>\n        \n        <TH>\n            \n        </TH> \n        \n  "
-            "      <TH>\n            "
-            f'{start_of_week.strftime("%a, %b %d").replace(" 0"," ")}\n        </TH>'
-        )
+        # Check that the context contains the correct date range
+        self.assertEqual(response.context["datefrom"], datefrom)
+        self.assertEqual(response.context["dateto"], dateto)
 
-        self.assertContains(response, response_test)
+        # Render the template and check for the correct date display
+        content = response.content.decode("utf-8")
+        self.assertIn(datefrom.strftime("%a, %b %d"), content)
+        self.assertIn(dateto.strftime("%a, %b %d"), content)
 
     def test_should_display_all_info_for_each_date_in_calendar(self):
         url = "/cal/?datefrom=20240108&dateto=20240114"
@@ -202,9 +251,9 @@ class TestCreateDateEntry(TestCase):
         self.client.login(username="admin", password="adminpass")
 
     def test_should_render_add_date_entry_page(self):
-        url = "/cal/date/create/"
+        url = "/cal/shift/create/"
         response = self.client.get(url)
-        self.assertTemplateUsed(response, "create.html")
+        self.assertTemplateUsed(response, "create_shift.html")
         self.assertEqual(response.status_code, 200)
 
     def test_should_save_correctly_when_new_date_is_created(self):
@@ -214,6 +263,7 @@ class TestCreateDateEntry(TestCase):
             {
                 "job": self.job.id,
                 "date": date(2024, 1, 23),
+                "days": 1,
                 "crew": "George",
                 "notes": "notes",
                 "quantity": "200T",

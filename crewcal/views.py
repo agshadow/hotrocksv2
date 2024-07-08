@@ -49,6 +49,8 @@ def cal_home(request):
                 datefrom = datefrom + timedelta(days=7)
                 dateto = dateto + timedelta(days=7)
 
+                print(f"inside cal_home : datefrom {datefrom} - dateto {dateto}")
+
         # get jobs which belong to users workgroup
         jobs = (
             DateEntry.objects.filter(
@@ -58,6 +60,7 @@ def cal_home(request):
             .order_by("date")
             .order_by("crew")
         )
+        print(f"inside cal_home : datefrom {datefrom} - dateto {dateto}")
         # rebuild the data structure to display per crew
         jobs_transposed_by_crew = {
             "0": transpose_dates(datefrom),
