@@ -98,8 +98,12 @@ DATABASES = {
         # use 'localhost' or '127.0.0.1'
         "PORT": os.environ.get("DATABASE_PORT"),  # Default PostgreSQL port is usually
         #'5432'
+        'OPTIONS': {
+            'options': '-c search_path=hotrocksv1_schema',
+        }
     }
 }
+# when testing use SQLite Database
 if "test" in sys.argv:
     # Use SQLite for tests
     print("in test mode : using SQLite")

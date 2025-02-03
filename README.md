@@ -21,7 +21,7 @@ pip install -r requirement.txt
 set up .env file with database settings (see below database .env setup)
 
 how to run in debug mode:
-python manage.py runserver
+python manage.py runserver  
 
 should be running on http://localhost:8000
 
@@ -64,6 +64,10 @@ DATABASE_PORT=5432
 You can populate the database with the scripts/populate_cal_db.py by pasting
 it into a django shell
 
+# add admin user
+python manage.py createsuperuser
+add your admin user name and password
+then run script to populate the database (as above)
 
 # Set Up azure
 Now create a resource -> webapp
