@@ -312,7 +312,7 @@ class TestPdfResport(TestCase):
         url = f"/report/pdf_report/{self.incident_report.id}/"
         response = self.client.get(url)
         self.assertEqual(200, response.status_code)
-        self.assertEquals(
+        self.assertEqual(
             response.get("Content-Disposition"), 'attachment; filename="report.pdf"'
         )
 

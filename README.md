@@ -18,6 +18,8 @@ python -m venv venv
 install packages from requirements.
 pip install -r requirement.txt
 
+set up .env file with database settings (see below database .env setup)
+
 how to run in debug mode:
 python manage.py runserver
 

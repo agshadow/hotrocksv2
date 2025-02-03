@@ -68,12 +68,14 @@ class TestCalHome(TestCase):
         self.assertNotContains(response, "Roger")
 
     def test_should_be_able_to_go_to_next_date_range(self):
+        print("--------------_IN TEST test_should_be_able_to_go_to_next_date_range ")
         today = date.today()
         datefrom = start_of_week(today)
         print(f"datefrom : {datefrom}")
         dateto = datefrom + timedelta(days=7)
 
         # Simulate going to the next week
+        print("datefrom ", datefrom.strftime("%Y-%m-%d"), "goto: ","next_week")
         response = self.client.get(
             reverse("cal_home"),
             {"datefrom": datefrom.strftime("%Y-%m-%d"), "goto": "next_week"},
@@ -97,13 +99,15 @@ class TestCalHome(TestCase):
 
         # Render the template and check for the correct date display
         content = response.content.decode("utf-8")
-        self.assertIn(next_week_datefrom.strftime("%a, %b %#d"), content)
-        self.assertIn(next_week_dateto.strftime("%a, %b %#d"), content)
+        self.assertIn(next_week_datefrom.strftime("%a, %b %-d"), content)
+        self.assertIn(next_week_dateto.strftime("%a, %b %-d"), content)
 
     def test_should_be_able_to_go_to_previous_date_range(self):
+        print("--------------_IN TEST test_should_be_able_to_go_to_previous_date_range ")
         today = date.today()
         datefrom = start_of_week(today)
         dateto = datefrom + timedelta(days=7)
+        print (f"Today: {today}, datefrom {datefrom}, dateto {dateto}")
 
         # Simulate going to the previous week
         response = self.client.get(
@@ -124,8 +128,8 @@ class TestCalHome(TestCase):
 
         # Render the template and check for the correct date display
         content = response.content.decode("utf-8")
-        self.assertIn(previous_week_datefrom.strftime("%a, %b %d"), content)
-        self.assertIn(previous_week_dateto.strftime("%a, %b %d"), content)
+        self.assertIn(previous_week_datefrom.strftime("%a, %b %-d"), content)
+        self.assertIn(previous_week_dateto.strftime("%a, %b %-d"), content)
 
     def test_should_default_to_the_monday_of_the_current_week(self):
         response = self.client.get(reverse("cal_home"))
@@ -144,8 +148,8 @@ class TestCalHome(TestCase):
 
         # Render the template and check for the correct date display
         content = response.content.decode("utf-8")
-        self.assertIn(datefrom.strftime("%a, %b %d"), content)
-        self.assertIn(dateto.strftime("%a, %b %d"), content)
+        self.assertIn(datefrom.strftime("%a, %b %-d"), content)
+        self.assertIn(dateto.strftime("%a, %b %-d"), content)
 
     def test_should_display_all_info_for_each_date_in_calendar(self):
         url = "/cal/?datefrom=20240108&dateto=20240114"

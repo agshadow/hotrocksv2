@@ -83,10 +83,11 @@ WSGI_APPLICATION = "hotrocks.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-print(os.environ.get("DATABASE_NAME"))
-print(os.environ.get("DATABASE_USER"))
-print(os.environ.get("DATABASE_PASSWORD"))
-print(os.environ.get("DATABASE_HOST"))
+print ("Initialising Database")
+print("DB Name: " , os.environ.get("DATABASE_NAME"))
+print("DB User: " , os.environ.get("DATABASE_USER"))
+print("DB Password: " , os.environ.get("DATABASE_PASSWORD"))
+print("DB Host: " , os.environ.get("DATABASE_HOST"))
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -101,6 +102,7 @@ DATABASES = {
 }
 if "test" in sys.argv:
     # Use SQLite for tests
+    print("in test mode : using SQLite")
     DATABASES["default"] = {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
